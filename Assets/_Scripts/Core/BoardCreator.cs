@@ -1,8 +1,10 @@
 using UnityEngine;
 using Grid = Core.Grid<Tile>;
+using AsyncOperator.Extensions;
 
+[RequireComponent( typeof( BoardSetter ) )]
 public sealed class BoardCreator : MonoBehaviour {
-    [SerializeField] private Tile tilePf;
+    [SerializeField] private BoardSetter boardSetter;
 
     [Min( 1 ), SerializeField] private int gridWidth;
     [Min( 1 ), SerializeField] private int gridHeight;
@@ -11,16 +13,12 @@ public sealed class BoardCreator : MonoBehaviour {
 
     private Grid grid;
 
-    private void Start() {
-        grid = new Grid( gridWidth, gridHeight, gridTileSize, gridOrigin );
-        CreateTiles();
+    private void OnValidate() {
+        gameObject.GetComponent( ref boardSetter );
     }
 
-    private void CreateTiles() {
-        for ( int w = 0 ; w < gridWidth ; w++ ) {
-            for ( int h = 0 ; h < gridHeight ; h++ ) {
-                Instantiate<Tile>( tilePf, grid.GetWorldPosition( w, h ), Quaternion.identity, transform );
-            }
-        }
+    private void Start() {
+        grid = new Grid( gridWidth, gridHeight, gridTileSize, gridOrigin );
+        boardSetter.SetBoard( grid, gridWidth, gridHeight );
     }
 }
