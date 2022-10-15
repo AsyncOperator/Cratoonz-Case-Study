@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using AsyncOperator.Singleton;
 
+[DefaultExecutionOrder( -10 )]
 public sealed class InputManager : Singleton<InputManager> {
     private InputControls inputControls;
 
