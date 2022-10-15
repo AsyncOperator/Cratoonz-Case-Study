@@ -59,5 +59,41 @@ namespace Core {
             GetXY( worldPosition, out int x, out int y );
             return GetValue( x, y );
         }
+
+        public T RightNeighbour( int x, int y ) {
+            if ( x >= 0 && y >= 0 && x < width - 1 && y < height ) {
+                return tileArr[ x + 1, y ];
+            }
+            else {
+                return default( T );
+            }
+        }
+
+        public T LeftNeighbour( int x, int y ) {
+            if ( x >= 1 && y >= 0 && x < width && y < height ) {
+                return tileArr[ x - 1, y ];
+            }
+            else {
+                return default( T );
+            }
+        }
+
+        public T UpNeighbour( int x, int y ) {
+            if ( x >= 0 && y >= 0 && x < width && y < height - 1 ) {
+                return tileArr[ x, y + 1 ];
+            }
+            else {
+                return default( T );
+            }
+        }
+
+        public T DownNeighbour( int x, int y ) {
+            if ( x >= 0 && y >= 1 && x < width && y < height ) {
+                return tileArr[ x, y - 1 ];
+            }
+            else {
+                return default( T );
+            }
+        }
     }
 }
