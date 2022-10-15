@@ -18,7 +18,5 @@ public sealed class Drop : MonoBehaviour {
     }
     #endregion
 
-    private void OnValidate() {
-        gameObject.GetComponent( ref spriteRenderer );
-    }
+    private void OnValidate() => gameObject.GetComponent( ref spriteRenderer );
 }

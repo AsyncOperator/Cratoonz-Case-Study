@@ -1,22 +1,34 @@
 using UnityEngine;
-using Grid = Core.Grid<Tile>;
+using Core;
 using AsyncOperator.Extensions;
 
 [RequireComponent( typeof( BoardSetter ) )]
 public sealed class BoardCreator : MonoBehaviour {
     [SerializeField] private BoardSetter boardSetter;
+    [SerializeField] private Swiper swiper;
 
+    #region Grid Settings
+    [Space( 10 )]
+    [Header( "GRID SETTINGS" )]
+    [Space( 15 )]
+
+    [Tooltip( "How many tiles will be on the grid row" )]
     [Min( 1 ), SerializeField] private int gridWidth = 8;
+    [Tooltip( "How many tiles will be on the grid column" )]
     [Min( 1 ), SerializeField] private int gridHeight = 8;
-    [SerializeField] private float gridTileSize = 1f;
+    [Tooltip( "Scale of the tile (result value will be => Vector3.one * gridTileSize)" )]
+    [Min( 1f ), SerializeField] private float gridTileSize = 1f;
+    [Tooltip( "Set the grid pivot position (remember grid pivot is on bottom left corner)" )]
     [SerializeField] private Vector3 gridOrigin = Vector3.zero;
+    #endregion
 
-    private Grid grid;
+    private Grid<Tile> grid;
 
     private void OnValidate() => gameObject.GetComponent( ref boardSetter );
 
     private void Start() {
-        grid = new Grid( gridWidth, gridHeight, gridTileSize, gridOrigin );
+        grid = new Grid<Tile>( gridWidth, gridHeight, gridTileSize, gridOrigin );
         boardSetter.SetBoard( grid, gridWidth, gridHeight );
+        swiper.Grid = grid;
     }
 }

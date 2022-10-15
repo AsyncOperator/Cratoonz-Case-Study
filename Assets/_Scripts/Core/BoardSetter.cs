@@ -9,7 +9,6 @@ public sealed class BoardSetter : MonoBehaviour {
     [SerializeField] private DropSO[] dropSOs;
 
     public void SetBoard( Grid grid, int width, int height ) {
-
         Tile downTile = null;
         Tile leftTile = null;
 

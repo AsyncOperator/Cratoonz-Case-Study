@@ -29,11 +29,7 @@ public sealed class InputManager : Singleton<InputManager> {
         inputControls.Disable();
     }
 
-    private void OnTouchStarted( InputAction.CallbackContext ctx ) {
-        OnTouchStartPosition?.Invoke( inputControls.Swipe.TouchPosition.ReadValue<Vector2>() );
-    }
+    private void OnTouchStarted( InputAction.CallbackContext ctx ) => OnTouchStartPosition?.Invoke( inputControls.Swipe.TouchPosition.ReadValue<Vector2>() );
 
-    private void OnTouchCancelled( InputAction.CallbackContext ctx ) {
-        OnTouchCancelPosition?.Invoke( inputControls.Swipe.TouchPosition.ReadValue<Vector2>() );
-    }
+    private void OnTouchCancelled( InputAction.CallbackContext ctx ) => OnTouchCancelPosition?.Invoke( inputControls.Swipe.TouchPosition.ReadValue<Vector2>() );
 }

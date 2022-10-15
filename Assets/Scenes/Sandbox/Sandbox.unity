@@ -198,6 +198,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardSetter: {fileID: 317593119}
+  swiper: {fileID: 884920257}
   gridWidth: 8
   gridHeight: 8
   gridTileSize: 1
