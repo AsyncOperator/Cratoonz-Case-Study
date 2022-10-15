@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using Grid = Core.Grid<Tile>;
 
@@ -9,15 +10,25 @@ public sealed class BoardSetter : MonoBehaviour {
 
     public void SetBoard( Grid grid, int width, int height ) {
 
-        for ( int w = 0 ; w < width ; w++ ) {
-            for ( int h = 0 ; h < height ; h++ ) {
-                Vector3 worldPosition = grid.GetWorldPosition( w, h );
+        Tile downTile = null;
+        Tile leftTile = null;
 
-                var tileInstance = Instantiate<Tile>( tilePf, worldPosition, Quaternion.identity, this.transform );
+        for ( int x = 0 ; x < width ; x++ ) {
+            for ( int y = 0 ; y < height ; y++ ) {
+                leftTile = grid.LeftNeighbour( x, y );
+                downTile = grid.DownNeighbour( x, y );
+
+                Vector3 spawnPosition = grid.GetWorldPosition( x, y );
+                var tileInstance = Instantiate<Tile>( tilePf, spawnPosition, Quaternion.identity, this.transform );
+
                 var dropInstance = Instantiate<Drop>( dropPf );
-
                 dropInstance.transform.SetParent( tileInstance.transform, false );
-                dropInstance.DropData = dropSOs[ Random.Range( 0, dropSOs.Length ) ];
+
+                var availableDropSOs = dropSOs.Where( drop => drop != downTile?.Drop.DropData && drop != leftTile?.Drop.DropData );
+                dropInstance.DropData = availableDropSOs.ElementAt( Random.Range( 0, availableDropSOs.Count() ) );
+                tileInstance.Drop = dropInstance;
+
+                grid.SetValue( x, y, tileInstance );
             }
         }
     }

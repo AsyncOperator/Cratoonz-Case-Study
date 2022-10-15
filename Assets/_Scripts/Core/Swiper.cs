@@ -1,7 +1,7 @@
 using UnityEngine;
-using AsyncOperator.Helpers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using AsyncOperator.Helpers;
 
 namespace Core {
     public sealed class Swiper : MonoBehaviour {
