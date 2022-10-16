@@ -3,7 +3,11 @@ using UnityEngine;
 namespace Core {
     public sealed class Grid<T> {
         private int width;
+        public int Width => width;
+
         private int height;
+        public int Height => height;
+
         private float tileSize;
         private Vector3 origin;
 
@@ -17,6 +21,7 @@ namespace Core {
 
             tileArr = new T[ width, height ];
 
+#if UNITY_EDITOR
             for ( int x = 0 ; x < tileArr.GetLength( 0 ) ; x++ ) {
                 for ( int y = 0 ; y < tileArr.GetLength( 1 ) ; y++ ) {
                     Debug.DrawLine( GetWorldPosition( x, y ), GetWorldPosition( x, y + 1 ), Color.red, Mathf.Infinity );
@@ -26,6 +31,7 @@ namespace Core {
 
             Debug.DrawLine( GetWorldPosition( 0, height ), GetWorldPosition( width, height ), Color.red, Mathf.Infinity );
             Debug.DrawLine( GetWorldPosition( width, 0 ), GetWorldPosition( width, height ), Color.red, Mathf.Infinity );
+#endif
         }
 
         public Vector3 GetWorldPosition( int x, int y ) => new Vector3( x, y ) * tileSize + origin;
@@ -33,6 +39,12 @@ namespace Core {
         public void GetXY( Vector3 worldPosition, out int x, out int y ) {
             x = Mathf.FloorToInt( ( worldPosition - origin ).x / tileSize );
             y = Mathf.FloorToInt( ( worldPosition - origin ).y / tileSize );
+        }
+
+        public Vector2Int GetXY( Vector3 worldPosition ) {
+            int x = Mathf.FloorToInt( ( worldPosition - origin ).x / tileSize );
+            int y = Mathf.FloorToInt( ( worldPosition - origin ).y / tileSize );
+            return new Vector2Int( x, y );
         }
 
         public void SetValue( int x, int y, T value ) {
