@@ -23,6 +23,7 @@ namespace Core.Board {
 
                     Vector3 spawnPosition = grid.GetWorldPosition( x, y );
                     var tileInstance = Instantiate<Tile>( tilePf, spawnPosition, Quaternion.identity, this.transform );
+                    tileInstance.name = $"Tile( {x}, {y})";
 
                     var dropInstance = Instantiate<Drop>( dropPf );
                     dropInstance.transform.SetParent( tileInstance.transform, false );
