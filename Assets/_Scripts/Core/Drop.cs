@@ -13,7 +13,7 @@ public sealed class Drop : MonoBehaviour {
         set
         {
             dropData = value;
-            spriteRenderer.sprite = dropData.dropSprite;
+            spriteRenderer.sprite = dropData != null ? dropData.dropSprite : null;
         }
     }
     #endregion
