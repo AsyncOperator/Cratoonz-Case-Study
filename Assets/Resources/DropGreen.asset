@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99d10038d95617d438a932542a5c3d9c, type: 3}
   m_Name: DropGreen
   m_EditorClassIdentifier: 
-  dropSprite: {fileID: 21300000, guid: 5614684d5d49edc4487c8403eb270127, type: 3}
+  dropSprite: {fileID: 527314040, guid: 4c9f37e8a737c9743a9e61fc43d16668, type: 3}
   dropType: 1

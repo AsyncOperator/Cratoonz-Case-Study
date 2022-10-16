@@ -46,6 +46,9 @@ namespace Core {
             if ( hit.transform != null ) {
                 selectedTile = hit.transform.TryGetComponent( out Tile tile ) ? tile : null; 
             }
+            else {
+                selectedTile = null;
+            }
         }
 
         private void InputManager_OnTouchCancelPosition( Vector2 touchEndPosition ) {

@@ -1,12 +1,12 @@
 fileFormatVersion: 2
-guid: 5614684d5d49edc4487c8403eb270127
+guid: 4c9f37e8a737c9743a9e61fc43d16668
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
+    enableMipMap: 1
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -36,16 +36,16 @@ TextureImporter:
     filterMode: 1
     aniso: 1
     mipBias: 0
-    wrapU: 1
-    wrapV: 1
+    wrapU: 0
+    wrapV: 0
     wrapW: 0
-  nPOTScale: 0
+  nPOTScale: 1
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 6
+  alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 256
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
@@ -114,18 +114,128 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: T_Drop-Blue_GUI
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 780
+        width: 255
+        height: 244
+      alignment: 9
+      pivot: {x: 0, y: -0.020491803}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b18bf5faea3a4240a74087dff31fc71
+      internalID: -1373905571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T_Drop-Green_GUI
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 773
+        width: 245
+        height: 251
+      alignment: 9
+      pivot: {x: -0.012244898, y: -0.015936255}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3024aa41644786c4d9017bf38cf62d6d
+      internalID: 527314040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T_Drop-Red_GUI
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 522
+        width: 250
+        height: 251
+      alignment: 9
+      pivot: {x: -0.008, y: -0.007968128}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be5fe0d967d131d4fbfec63d825d3f4f
+      internalID: 1879828250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T_Drop-Yellow_GUI
+      rect:
+        serializedVersion: 2
+        x: 250
+        y: 518
+        width: 255
+        height: 255
+      alignment: 6
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b611cb679a506fc44bf5d3c37243ee2b
+      internalID: -338123307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T_Tile_GUI
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 262
+        width: 256
+        height: 256
+      alignment: 6
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95626f4fa5d46a040bbe79326190bc1f
+      internalID: -1403041263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: e548ed93a4b6d2f488c866d2273b413a
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      T_Drop-Blue_GUI: -1373905571
+      T_Tile_GUI: -1403041263
+      T_Drop-Green_GUI: 527314040
+      T_Drop-Yellow_GUI: -338123307
+      T_Drop-Red_GUI: 1879828250
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
