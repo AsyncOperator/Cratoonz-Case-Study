@@ -23,11 +23,11 @@ namespace Core {
 
         [Range( 10f, 40f ), SerializeField] private float angleThreshold;
 
-        public Grid Grid { get; set; }
         private Tile selectedTile;
-
         private Vector2 touchStartPosition;
         private Vector2 touchEndPosition;
+
+        public Grid Grid { get; set; }
 
         private void OnEnable() {
             InputManager.OnTouchStartPosition += InputManager_OnTouchStartPosition;
@@ -43,9 +43,12 @@ namespace Core {
             this.touchStartPosition = Helpers.ConvertPixelCoordinateToWorldPosition( Camera.main, touchStartPosition );
 
             RaycastHit2D hit = Physics2D.Raycast( this.touchStartPosition, Vector2.zero );
+
+            // If ray hit something then try get tile component from the hit object, otherwise set selectedTile field to null
             if ( hit.transform != null ) {
                 selectedTile = hit.transform.TryGetComponent( out Tile tile ) ? tile : null; 
             }
+            // If ray did not hit anything
             else {
                 selectedTile = null;
             }
@@ -62,6 +65,7 @@ namespace Core {
 
         private void CalculateSwipeDirection() {
 #if UNITY_EDITOR
+            // To visualize swipe in scene view ~dont forget to enable gizmos
             Debug.DrawLine( touchStartPosition, touchEndPosition, Color.blue, 10f );
 #endif
             Vector2 direction = ( touchEndPosition - touchStartPosition ).normalized;
