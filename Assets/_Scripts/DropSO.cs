@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu( fileName = "DropData.asset", menuName = "Create new Drop Data" )]
+[CreateAssetMenu( fileName = "NewDropData.asset", menuName = "Create new Drop Data" )]
 public sealed class DropSO : ScriptableObject {
     public enum DropType {
         Red,
