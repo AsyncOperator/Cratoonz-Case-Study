@@ -1,11 +1,11 @@
 using UnityEngine;
 using AsyncOperator.Extensions;
+using System;
 
 namespace Core.Board {
     [RequireComponent( typeof( BoardSetter ) )]
     public sealed class BoardCreator : MonoBehaviour {
         [SerializeField] private BoardSetter boardSetter;
-        [SerializeField] private Swiper swiper;
 
         #region Grid Settings
         [Space( 10 )]
@@ -24,12 +24,15 @@ namespace Core.Board {
 
         private Grid<Tile> grid;
 
+        public event Action<Grid<Tile>> OnBoardCreated;
+
         private void OnValidate() => gameObject.GetComponent( ref boardSetter );
 
         private void Start() {
             grid = new Grid<Tile>( gridWidth, gridHeight, gridTileSize, gridOrigin );
             boardSetter.SetBoard( grid, gridWidth, gridHeight );
-            swiper.Grid = grid;
+
+            OnBoardCreated?.Invoke( grid );
         }
     }
 }
