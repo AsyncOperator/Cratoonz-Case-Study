@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Core.Board;
@@ -24,6 +25,7 @@ namespace Core {
 
         [Range( 10f, 40f ), SerializeField] private float angleThreshold;
         [SerializeField] private Matcher matcher;
+        [SerializeField] private DropMover dropMover;
 
         private Tile selectedTile;
         private Vector2 touchStartPosition;
@@ -103,40 +105,25 @@ namespace Core {
                 switch ( swipeDirectionType ) {
                     case DirectionType.Right:
                         targetTile = grid.RightNeighbour( selectedTileXY.x, selectedTileXY.y );
-                        if ( targetTile?.Drop?.DropData != null ) {
-                            Swap( targetTile );
-                        }
                         break;
                     case DirectionType.Left:
                         targetTile = grid.LeftNeighbour( selectedTileXY.x, selectedTileXY.y );
-                        if ( targetTile?.Drop?.DropData != null ) {
-                            Swap( targetTile );
-                        }
                         break;
                     case DirectionType.Up:
                         targetTile = grid.UpNeighbour( selectedTileXY.x, selectedTileXY.y );
-                        if ( targetTile?.Drop?.DropData != null ) {
-                            Swap( targetTile );
-                        }
                         break;
                     case DirectionType.Down:
                         targetTile = grid.DownNeighbour( selectedTileXY.x, selectedTileXY.y );
-                        if ( targetTile?.Drop?.DropData != null ) {
-                            Swap( targetTile );
-                        }
                         break;
+                }
+                if ( targetTile?.Drop?.DropData != null ) {
+                    StartCoroutine( Swap( targetTile ) );
                 }
             }
 
-            void Swap( Tile targetTile ) {
-                Drop selectedTileDrop = selectedTile.Drop;
-                Drop targetTileDrop = targetTile.Drop;
-
-                selectedTileDrop.transform.SetParent( targetTile.transform, false );
-                targetTileDrop.transform.SetParent( selectedTile.transform, false );
-
-                selectedTile.Drop = targetTileDrop;
-                targetTile.Drop = selectedTileDrop;
+            IEnumerator Swap( Tile targetTile ) {
+                // Wait for tween finished to call matcher
+                yield return dropMover.SwapTiles( selectedTile, targetTile );
 
                 Vector2Int firstRowColumn = grid.GetXY( selectedTile.transform.position );
                 Vector2Int secondRowColumn = grid.GetXY( targetTile.transform.position );
