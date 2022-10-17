@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Grid = Core.Grid<Tile>;
 using Core.Board;
+using System;
 
 public sealed class Matcher : MonoBehaviour {
     [Min( 3 ), SerializeField] private int repeatTimesToCountAsMatch;
 
     private Grid grid;
+    private int gridWidth, gridHeight;
 
-    private int gridWidth;
-    private int gridHeight;
+    public event Action OnMatchHappened;
 
     private void OnEnable() {
         FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => {
@@ -54,8 +55,12 @@ public sealed class Matcher : MonoBehaviour {
         tiles = tiles.Distinct().ToList();
 
         // Delete dropData inside tile
-        for ( int i = 0 ; i < tiles.Count ; i++ ) {
-            tiles[ i ].Drop.DropData = null;
+        if ( tiles.Count != 0 ) {
+            for ( int i = 0 ; i < tiles.Count ; i++ ) {
+                tiles[ i ].Drop.DropData = null;
+            }
+
+            OnMatchHappened?.Invoke();
         }
     }
 
