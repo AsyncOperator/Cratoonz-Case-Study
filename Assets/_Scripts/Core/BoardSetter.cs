@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Grid = Core.Grid<Tile>;
 
 namespace Core.Board {
     public sealed class BoardSetter : MonoBehaviour {
@@ -8,13 +10,24 @@ namespace Core.Board {
 
         [SerializeField] private DropSO[] dropSOs;
 
-        public void SetBoard( Grid<Tile> grid, int width, int height ) {
+        private Grid grid;
+        private int gridWidth, gridHeight;
+
+        private void OnEnable() => FindObjectOfType<Matcher>().OnMatchHappened += FindEmptyTiles;
+
+        private void OnDisable() => FindObjectOfType<Matcher>().OnMatchHappened -= FindEmptyTiles;
+
+        public void SetBoard( Grid<Tile> g ) {
+            grid = g;
+            gridWidth = grid.Width;
+            gridHeight = grid.Height;
+
             // local caching
             Tile downTile = null;
             Tile leftTile = null;
 
-            for ( int x = 0 ; x < width ; x++ ) {
-                for ( int y = 0 ; y < height ; y++ ) {
+            for ( int x = 0 ; x < gridWidth ; x++ ) {
+                for ( int y = 0 ; y < gridHeight ; y++ ) {
 
                     // Since we are moving from left to right (row increment) and bottom to top (column increment),
                     // we can just check left and bottom neighbour of current tile to make decision of which dropData can be set for the current tile
@@ -35,6 +48,84 @@ namespace Core.Board {
                     // Finally, set grid value by generated tile
                     grid.SetValue( x, y, tileInstance );
                 }
+            }
+        }
+
+        private void FindEmptyTiles() {
+            Tile searchingTile = null;
+            List<int> emptyTilesColumn = new();
+
+            for ( int x = 0 ; x < gridWidth ; x++ ) {
+                for ( int y = 0 ; y < gridHeight ; y++ ) {
+                    searchingTile = grid.GetValue( x, y );
+                    // Finding one empty tile enough, since we gonna check every tile in that column when pushing down, so breaking the inside for loop
+                    if ( searchingTile != null && searchingTile.Drop?.DropData == null ) {
+                        emptyTilesColumn.Add( x );
+                        break;
+                    }
+                }
+            }
+
+            emptyTilesColumn = emptyTilesColumn.Distinct().ToList();
+
+            if ( emptyTilesColumn.Count != 0 ) {
+#if UNITY_EDITOR
+                for ( int i = 0 ; i < emptyTilesColumn.Count ; i++ ) {
+                    Debug.Log( $"{emptyTilesColumn[ i ]}" );
+                }
+#endif
+
+                for ( int i = 0 ; i < emptyTilesColumn.Count ; i++ ) {
+                    PushTopTiles( emptyTilesColumn[ i ] );
+                }
+            }
+        }
+
+        private void PushTopTiles( int rowIndex ) {
+            Tile searchingTile = null;
+            int emptyTileCount = 0;
+
+            List<Data> datas = new();
+
+            for ( int y = 0 ; y < gridHeight ; y++ ) {
+                searchingTile = grid.GetValue( rowIndex, y );
+                if ( searchingTile.Drop.DropData == null ) {
+                    emptyTileCount++;
+                }
+                else {
+                    if ( emptyTileCount != 0 ) {
+                        datas.Add( new Data( y, emptyTileCount ) );
+                    }
+                }
+            }
+
+            if ( datas.Count != 0 ) {
+                for ( int i = 0 ; i < datas.Count ; i++ ) {
+                    Tile tileToPush = grid.GetValue( rowIndex, datas[ i ].RowIndex );
+                    Tile t = grid.GetValue( rowIndex, datas[ i ].RowIndex - datas[ i ].EmptyTileCount );
+
+                    t.Drop.DropData = tileToPush.Drop.DropData;
+                    tileToPush.Drop.DropData = null;
+                }
+            }
+
+            //// Fill empty top tiles
+            //for ( int x = 0 ; x < gridWidth ; x++ ) {
+            //    Tile t = grid.GetValue( x, columnIndex );
+            //    if ( t?.Drop?.DropData == null ) {
+            //        Debug.Log( "Hakan" );
+            //        t.Drop.DropData = dropSOs[ Random.Range( 0, dropSOs.Length ) ];
+            //    }
+            //}
+        }
+
+        private struct Data {
+            public int RowIndex { get; private set; }
+            public int EmptyTileCount { get; private set; }
+
+            public Data( int rowIndex, int emptyTileCount ) {
+                RowIndex = rowIndex;
+                EmptyTileCount = emptyTileCount;
             }
         }
     }
