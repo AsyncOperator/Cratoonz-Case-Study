@@ -30,7 +30,7 @@ namespace Core.Board {
 
         private void Start() {
             grid = new Grid<Tile>( gridWidth, gridHeight, gridTileSize, gridOrigin );
-            boardSetter.SetBoard( grid, gridWidth, gridHeight );
+            boardSetter.SetBoard( grid );
 
             OnBoardCreated?.Invoke( grid );
         }
