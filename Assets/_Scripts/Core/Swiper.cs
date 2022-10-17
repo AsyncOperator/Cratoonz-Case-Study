@@ -47,21 +47,27 @@ namespace Core {
 
         private void InputManager_OnTouchStartPosition( Vector2 touchStartPosition ) {
             this.touchStartPosition = Helpers.ConvertPixelCoordinateToWorldPosition( Camera.main, touchStartPosition );
-
             RaycastHit2D hit = Physics2D.Raycast( this.touchStartPosition, Vector2.zero );
 
-            // If ray hit something then try get tile component from the hit object, otherwise set selectedTile field to null
+            // If ray hit something
             if ( hit.transform != null ) {
-                selectedTile = hit.transform.TryGetComponent( out Tile tile ) ? tile : null;
+                // Try get Tile component from hit gameObject
+                if ( hit.transform.TryGetComponent( out Tile tile ) ) {
+                    // Then check whether the tile contains some drop inside then it is a valid tile
+                    selectedTile = tile.Drop?.DropData != null ? tile : null;
+                }
+                else {
+                    selectedTile = null;
+                }
             }
-            // If ray did not hit anything
+            // If ray did not hit anything ~means player clicking somewhere outside of the grid boundaries
             else {
                 selectedTile = null;
             }
         }
 
         private void InputManager_OnTouchCancelPosition( Vector2 touchEndPosition ) {
-            if ( selectedTile == null || selectedTile.Drop == null ) {
+            if ( selectedTile == null ) {
                 return;
             }
 
@@ -92,40 +98,31 @@ namespace Core {
             if ( swipeDirectionType != DirectionType.None ) {
                 Tile targetTile = null;
 
-                int x, y;
-                grid.GetXY( selectedTile.transform.position, out x, out y );
+                Vector2Int selectedTileXY = grid.GetXY( selectedTile.transform.position );
 
                 switch ( swipeDirectionType ) {
                     case DirectionType.Right:
-                        targetTile = grid.RightNeighbour( x, y );
-                        if ( targetTile != null ) {
-                            if ( targetTile.Drop != null ) {
-                                Swap( targetTile );
-                            }
+                        targetTile = grid.RightNeighbour( selectedTileXY.x, selectedTileXY.y );
+                        if ( targetTile?.Drop?.DropData != null ) {
+                            Swap( targetTile );
                         }
                         break;
                     case DirectionType.Left:
-                        targetTile = grid.LeftNeighbour( x, y );
-                        if ( targetTile != null ) {
-                            if ( targetTile.Drop != null ) {
-                                Swap( targetTile );
-                            }
+                        targetTile = grid.LeftNeighbour( selectedTileXY.x, selectedTileXY.y );
+                        if ( targetTile?.Drop?.DropData != null ) {
+                            Swap( targetTile );
                         }
                         break;
                     case DirectionType.Up:
-                        targetTile = grid.UpNeighbour( x, y );
-                        if ( targetTile != null ) {
-                            if ( targetTile.Drop != null ) {
-                                Swap( targetTile );
-                            }
+                        targetTile = grid.UpNeighbour( selectedTileXY.x, selectedTileXY.y );
+                        if ( targetTile?.Drop?.DropData != null ) {
+                            Swap( targetTile );
                         }
                         break;
                     case DirectionType.Down:
-                        targetTile = grid.DownNeighbour( x, y );
-                        if ( targetTile != null ) {
-                            if ( targetTile.Drop != null ) {
-                                Swap( targetTile );
-                            }
+                        targetTile = grid.DownNeighbour( selectedTileXY.x, selectedTileXY.y );
+                        if ( targetTile?.Drop?.DropData != null ) {
+                            Swap( targetTile );
                         }
                         break;
                 }
