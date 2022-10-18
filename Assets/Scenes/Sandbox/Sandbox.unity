@@ -198,8 +198,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardSetter: {fileID: 317593119}
-  gridWidth: 8
-  gridHeight: 8
+  gridRowCount: 8
+  gridHeightCount: 8
   gridTileSize: 1
   gridOrigin: {x: 0, y: 0, z: 0}
 --- !u!4 &317593118

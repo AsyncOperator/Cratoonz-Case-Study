@@ -11,7 +11,7 @@ namespace Core.Board {
         [SerializeField] private DropSO[] dropSOs;
 
         private Grid grid;
-        private int gridWidth, gridHeight;
+        private int gridRow, gridColumn;
 
         private void OnEnable() => FindObjectOfType<Matcher>().OnMatchHappened += FindEmptyTiles;
 
@@ -19,24 +19,24 @@ namespace Core.Board {
 
         public void SetBoard( Grid<Tile> g ) {
             grid = g;
-            gridWidth = grid.Width;
-            gridHeight = grid.Height;
+            gridRow = grid.Row;
+            gridColumn = grid.Column;
 
             // local caching
             Tile downTile = null;
             Tile leftTile = null;
 
-            for ( int x = 0 ; x < gridWidth ; x++ ) {
-                for ( int y = 0 ; y < gridHeight ; y++ ) {
+            for ( int r = 0 ; r < gridRow ; r++ ) {
+                for ( int c = 0 ; c < gridColumn ; c++ ) {
 
                     // Since we are moving from left to right (row increment) and bottom to top (column increment),
                     // we can just check left and bottom neighbour of current tile to make decision of which dropData can be set for the current tile
-                    leftTile = grid.LeftNeighbour( x, y );
-                    downTile = grid.DownNeighbour( x, y );
+                    leftTile = grid.LeftNeighbour( r, c );
+                    downTile = grid.DownNeighbour( r, c );
 
-                    Vector3 spawnPosition = grid.GetWorldPosition( x, y );
+                    Vector3 spawnPosition = grid.GetWorldPosition( r, c );
                     var tileInstance = Instantiate<Tile>( tilePf, spawnPosition, Quaternion.identity, this.transform );
-                    tileInstance.name = $"Tile( {x}, {y})";
+                    tileInstance.name = $"Tile( {r}, {c})";
 
                     var dropInstance = Instantiate<Drop>( dropPf );
                     dropInstance.transform.SetParent( tileInstance.transform, false );
@@ -46,57 +46,58 @@ namespace Core.Board {
                     tileInstance.Drop = dropInstance;
 
                     // Finally, set grid value by generated tile
-                    grid.SetValue( x, y, tileInstance );
+                    grid.SetValue( r, c, tileInstance );
                 }
             }
         }
 
         private void FindEmptyTiles() {
             Tile searchingTile = null;
-            List<int> emptyTilesColumn = new();
+            List<int> emptyColumns = new(); // Store columns indeces which contains some empty tiles
 
-            for ( int x = 0 ; x < gridWidth ; x++ ) {
-                for ( int y = 0 ; y < gridHeight ; y++ ) {
-                    searchingTile = grid.GetValue( x, y );
+            for ( int c = 0 ; c < gridColumn ; c++ ) {
+                for ( int r = 0 ; r < gridRow ; r++ ) {
+
+                    searchingTile = grid.GetValue( r, c );
                     // Finding one empty tile enough, since we gonna check every tile in that column when pushing down, so breaking the inside for loop
-                    if ( searchingTile != null && searchingTile.Drop?.DropData == null ) {
-                        emptyTilesColumn.Add( x );
+                    if ( searchingTile?.Drop?.DropData == null ) {
+                        emptyColumns.Add( c );
                         break;
                     }
                 }
             }
 
-            emptyTilesColumn = emptyTilesColumn.Distinct().ToList();
+            emptyColumns = emptyColumns.Distinct().ToList();
 
-            if ( emptyTilesColumn.Count != 0 ) {
-                for ( int i = 0 ; i < emptyTilesColumn.Count ; i++ ) {
-                    PushTopTiles( emptyTilesColumn[ i ] );
+            if ( emptyColumns.Count != 0 ) {
+                for ( int i = 0 ; i < emptyColumns.Count ; i++ ) {
+                    PushTopTiles( emptyColumns[ i ] );
                 }
             }
         }
 
-        private void PushTopTiles( int rowIndex ) {
+        private void PushTopTiles( int columnIndex ) {
             Tile searchingTile = null;
             int emptyTileCount = 0;
 
-            List<Data> datas = new();
+            List<EmptyTileData> emptyTileDatas = new();
 
-            for ( int y = 0 ; y < gridHeight ; y++ ) {
-                searchingTile = grid.GetValue( rowIndex, y );
+            for ( int r = 0 ; r < gridRow ; r++ ) {
+                searchingTile = grid.GetValue( r, columnIndex );
                 if ( searchingTile.Drop.DropData == null ) {
                     emptyTileCount++;
                 }
                 else {
                     if ( emptyTileCount != 0 ) {
-                        datas.Add( new Data( y, emptyTileCount ) );
+                        emptyTileDatas.Add( new EmptyTileData( r, emptyTileCount ) );
                     }
                 }
             }
 
-            if ( datas.Count != 0 ) {
-                for ( int i = 0 ; i < datas.Count ; i++ ) {
-                    Tile tileToPush = grid.GetValue( rowIndex, datas[ i ].RowIndex );
-                    Tile t = grid.GetValue( rowIndex, datas[ i ].RowIndex - datas[ i ].EmptyTileCount );
+            if ( emptyTileDatas.Count != 0 ) {
+                for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
+                    Tile tileToPush = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
+                    Tile t = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
 
                     t.Drop.DropData = tileToPush.Drop.DropData;
                     tileToPush.Drop.DropData = null;
@@ -113,11 +114,11 @@ namespace Core.Board {
             //}
         }
 
-        private struct Data {
+        private struct EmptyTileData {
             public int RowIndex { get; private set; }
             public int EmptyTileCount { get; private set; }
 
-            public Data( int rowIndex, int emptyTileCount ) {
+            public EmptyTileData( int rowIndex, int emptyTileCount ) {
                 RowIndex = rowIndex;
                 EmptyTileCount = emptyTileCount;
             }
