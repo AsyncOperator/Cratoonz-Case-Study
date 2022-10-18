@@ -22,4 +22,7 @@ public sealed class DropMover : MonoBehaviour {
         t1.Drop = t2drop;
         t2.Drop = t1drop;
     }
+
+
+
 }

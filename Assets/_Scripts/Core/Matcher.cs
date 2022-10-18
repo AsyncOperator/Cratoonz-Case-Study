@@ -7,7 +7,7 @@ using Grid = Core.Grid<Tile>;
 using Core.Board;
 
 public sealed class Matcher : MonoBehaviour {
-    [Min( 3 ), SerializeField] private int repeatTimesToCountAsMatch;
+    private const int REPEAT_TIMES_TO_COUNT_AS_MATCH = 3;
 
     private Grid grid;
     private int gridRowCount, gridColumnCount;
@@ -83,7 +83,7 @@ public sealed class Matcher : MonoBehaviour {
 
         Tile headTile = null;
         int columnIndex = 0;
-        int repetitionCount = 1;
+        int repetitionTimes = 1;
 
         for ( int c = 0 ; c < gridColumnCount ; c++ ) {
             Tile currentTile = grid.GetValue( rowIndex, c );
@@ -92,14 +92,14 @@ public sealed class Matcher : MonoBehaviour {
             if ( headTile == null && currentTile?.Drop?.DropData != null ) {
                 headTile = currentTile;
                 columnIndex = c;
-                repetitionCount = 1;
+                repetitionTimes = 1;
             }
 
             else if ( headTile != null && headTile.Drop?.DropData == currentTile.Drop.DropData ) {
-                repetitionCount++;
+                repetitionTimes++;
 
-                if ( repetitionCount >= repeatTimesToCountAsMatch ) {
-                    for ( int i = 0 ; i < repetitionCount ; i++ ) {
+                if ( repetitionTimes >= REPEAT_TIMES_TO_COUNT_AS_MATCH ) {
+                    for ( int i = 0 ; i < repetitionTimes ; i++ ) {
                         matchingTiles.Add( grid.GetValue( rowIndex, columnIndex + i ) );
                     }
                 }
@@ -108,7 +108,7 @@ public sealed class Matcher : MonoBehaviour {
             else {
                 headTile = currentTile.Drop.DropData == null ? null : currentTile;
                 columnIndex = c;
-                repetitionCount = 1;
+                repetitionTimes = 1;
             }
         }
 
@@ -121,7 +121,7 @@ public sealed class Matcher : MonoBehaviour {
 
         Tile headTile = null;
         int rowIndex = 0;
-        int repetitionCount = 1;
+        int repetitionTimes = 1;
 
         for ( int r = 0 ; r < gridRowCount ; r++ ) {
             Tile currentTile = grid.GetValue( r, columnIndex );
@@ -130,14 +130,14 @@ public sealed class Matcher : MonoBehaviour {
             if ( headTile == null && currentTile?.Drop?.DropData != null ) {
                 headTile = currentTile;
                 rowIndex = r;
-                repetitionCount = 1;
+                repetitionTimes = 1;
             }
 
             else if ( headTile != null && headTile.Drop?.DropData == currentTile.Drop.DropData ) {
-                repetitionCount++;
+                repetitionTimes++;
 
-                if ( repetitionCount >= repeatTimesToCountAsMatch ) {
-                    for ( int i = 0 ; i < repetitionCount ; i++ ) {
+                if ( repetitionTimes >= REPEAT_TIMES_TO_COUNT_AS_MATCH ) {
+                    for ( int i = 0 ; i < repetitionTimes ; i++ ) {
                         matchingTiles.Add( grid.GetValue( rowIndex + i, columnIndex ) );
                     }
                 }
@@ -146,7 +146,7 @@ public sealed class Matcher : MonoBehaviour {
             else {
                 headTile = currentTile.Drop.DropData == null ? null : currentTile;
                 rowIndex = r;
-                repetitionCount = 1;
+                repetitionTimes = 1;
             }
         }
 

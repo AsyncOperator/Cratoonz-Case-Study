@@ -24,15 +24,28 @@ namespace Core.Board {
 
             // local caching
             Tile downTile = null;
+            Tile downDownTile = null;
             Tile leftTile = null;
+            Tile leftLeftTile = null;
+
+            List<DropSO> dropSOscannotBeUsed = new();
 
             for ( int r = 0 ; r < gridRow ; r++ ) {
                 for ( int c = 0 ; c < gridColumn ; c++ ) {
 
                     // Since we are moving from left to right (row increment) and bottom to top (column increment),
                     // we can just check left and bottom neighbour of current tile to make decision of which dropData can be set for the current tile
-                    leftTile = grid.LeftNeighbour( r, c );
                     downTile = grid.DownNeighbour( r, c );
+                    downDownTile = grid.DownNeighbour( r - 1, c );
+                    leftTile = grid.LeftNeighbour( r, c );
+                    leftLeftTile = grid.LeftNeighbour( r, c - 1 );
+
+                    if ( downTile?.Drop?.DropData == downDownTile?.Drop?.DropData ) {
+                        dropSOscannotBeUsed.Add( downTile?.Drop.DropData );
+                    }
+                    if ( leftTile?.Drop?.DropData == leftLeftTile?.Drop?.DropData ) {
+                        dropSOscannotBeUsed.Add( leftTile?.Drop.DropData );
+                    }
 
                     Vector3 spawnPosition = grid.GetWorldPosition( r, c );
                     var tileInstance = Instantiate<Tile>( tilePf, spawnPosition, Quaternion.identity, this.transform );
@@ -41,12 +54,15 @@ namespace Core.Board {
                     var dropInstance = Instantiate<Drop>( dropPf );
                     dropInstance.transform.SetParent( tileInstance.transform, false );
 
-                    var availableDropSOs = dropSOs.Where( drop => drop != downTile?.Drop?.DropData && drop != leftTile?.Drop?.DropData );
+                    var availableDropSOs = dropSOs.Except( dropSOscannotBeUsed );
+                    //var availableDropSOs = dropSOs.Where( drop => drop != downTile?.Drop?.DropData && drop != leftTile?.Drop?.DropData );
                     dropInstance.DropData = availableDropSOs.ElementAt( Random.Range( 0, availableDropSOs.Count() ) );
                     tileInstance.Drop = dropInstance;
 
                     // Finally, set grid value by generated tile
                     grid.SetValue( r, c, tileInstance );
+
+                    dropSOscannotBeUsed.Clear();
                 }
             }
         }
