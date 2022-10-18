@@ -81,27 +81,34 @@ public sealed class Matcher : MonoBehaviour {
     private List<Tile> FindMatchesOnRow( int rowIndex ) {
         List<Tile> matchingTiles = new();
 
-        Tile tileIterator = grid.GetValue( rowIndex, 0 );
-        int indexIterator = 0;
-        int repetationIterator = 1;
+        Tile headTile = null;
+        int columnIndex = 0;
+        int repetitionCount = 1;
 
-        for ( int c = 1 ; c < gridColumnCount ; c++ ) {
-            Tile t = grid.GetValue( rowIndex, c );
+        for ( int c = 0 ; c < gridColumnCount ; c++ ) {
+            Tile currentTile = grid.GetValue( rowIndex, c );
 
-            if ( tileIterator.Drop.DropData == t.Drop.DropData ) {
-                repetationIterator++;
+            // If head tile is not null and current tile we are searching has a valid dropData
+            if ( headTile == null && currentTile?.Drop?.DropData != null ) {
+                headTile = currentTile;
+                columnIndex = c;
+                repetitionCount = 1;
+            }
 
-                if ( repetationIterator >= repeatTimesToCountAsMatch ) {
-                    for ( int i = 0 ; i < repetationIterator ; i++ ) {
-                        matchingTiles.Add( grid.GetValue( rowIndex, indexIterator + i ) );
+            else if ( headTile != null && headTile.Drop?.DropData == currentTile.Drop.DropData ) {
+                repetitionCount++;
+
+                if ( repetitionCount >= repeatTimesToCountAsMatch ) {
+                    for ( int i = 0 ; i < repetitionCount ; i++ ) {
+                        matchingTiles.Add( grid.GetValue( rowIndex, columnIndex + i ) );
                     }
                 }
             }
 
             else {
-                indexIterator = c;
-                repetationIterator = 1;
-                tileIterator = grid.GetValue( rowIndex, c );
+                headTile = currentTile.Drop.DropData == null ? null : currentTile;
+                columnIndex = c;
+                repetitionCount = 1;
             }
         }
 
@@ -112,27 +119,34 @@ public sealed class Matcher : MonoBehaviour {
     private List<Tile> FindMatchesOnColumn( int columnIndex ) {
         List<Tile> matchingTiles = new();
 
-        Tile tileIterator = grid.GetValue( 0, columnIndex );
-        int indexIterator = 0;
-        int repetationIterator = 1;
+        Tile headTile = null;
+        int rowIndex = 0;
+        int repetitionCount = 1;
 
-        for ( int r = 1 ; r < gridRowCount ; r++ ) {
-            Tile t = grid.GetValue( r, columnIndex );
+        for ( int r = 0 ; r < gridRowCount ; r++ ) {
+            Tile currentTile = grid.GetValue( r, columnIndex );
 
-            if ( tileIterator.Drop.DropData == t.Drop.DropData ) {
-                repetationIterator++;
+            // If head tile is not null and current tile we are searching has a valid dropData
+            if ( headTile == null && currentTile?.Drop?.DropData != null ) {
+                headTile = currentTile;
+                rowIndex = r;
+                repetitionCount = 1;
+            }
 
-                if ( repetationIterator >= repeatTimesToCountAsMatch ) {
-                    for ( int i = 0 ; i < repetationIterator ; i++ ) {
-                        matchingTiles.Add( grid.GetValue( indexIterator + i, columnIndex ) );
+            else if ( headTile != null && headTile.Drop?.DropData == currentTile.Drop.DropData ) {
+                repetitionCount++;
+
+                if ( repetitionCount >= repeatTimesToCountAsMatch ) {
+                    for ( int i = 0 ; i < repetitionCount ; i++ ) {
+                        matchingTiles.Add( grid.GetValue( rowIndex + i, columnIndex ) );
                     }
                 }
             }
 
             else {
-                indexIterator = r;
-                repetationIterator = 1;
-                tileIterator = grid.GetValue( r, columnIndex );
+                headTile = currentTile.Drop.DropData == null ? null : currentTile;
+                rowIndex = r;
+                repetitionCount = 1;
             }
         }
 
