@@ -69,12 +69,6 @@ namespace Core.Board {
             emptyTilesColumn = emptyTilesColumn.Distinct().ToList();
 
             if ( emptyTilesColumn.Count != 0 ) {
-#if UNITY_EDITOR
-                for ( int i = 0 ; i < emptyTilesColumn.Count ; i++ ) {
-                    Debug.Log( $"{emptyTilesColumn[ i ]}" );
-                }
-#endif
-
                 for ( int i = 0 ; i < emptyTilesColumn.Count ; i++ ) {
                     PushTopTiles( emptyTilesColumn[ i ] );
                 }

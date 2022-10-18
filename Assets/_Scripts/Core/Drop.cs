@@ -8,6 +8,9 @@ public sealed class Drop : MonoBehaviour {
     #region Properties
     private DropSO dropData;
 
+    /// <summary>
+    /// Set dropData field, if it set to null then set spriteRenderer sprite to null otherwise set it to given value's sprite field
+    /// </summary>
     public DropSO DropData {
         get => dropData;
         set
