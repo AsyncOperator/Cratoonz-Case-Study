@@ -4,6 +4,7 @@ using UnityEngine;
 using Grid = Core.Grid<Tile>;
 using Core.Board;
 using System;
+using System.Threading.Tasks;
 
 public sealed class Matcher : MonoBehaviour {
     [Min( 3 ), SerializeField] private int repeatTimesToCountAsMatch;
@@ -21,7 +22,7 @@ public sealed class Matcher : MonoBehaviour {
         };
     }
 
-    public void Match( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
+    public bool Match( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
         List<Tile> tiles = new();
         List<Tile> returnedTile = new();
 
@@ -54,14 +55,27 @@ public sealed class Matcher : MonoBehaviour {
 
         tiles = tiles.Distinct().ToList();
 
-        // Delete dropData inside tile
+        Debug.Log( tiles.Count );
+        // Remove dropData inside tiles list
         if ( tiles.Count != 0 ) {
-            for ( int i = 0 ; i < tiles.Count ; i++ ) {
-                tiles[ i ].Drop.DropData = null;
-            }
-
-            OnMatchHappened?.Invoke();
+            RemoveTilesDrop( tiles );
+            return true;
         }
+        else {
+            return false;
+        }
+    }
+
+    private async void RemoveTilesDrop( List<Tile> tiles ) {
+        Task[] tasks = new Task[ tiles.Count ];
+
+        for ( int i = 0 ; i < tiles.Count ; i++ ) {
+            tasks[ i ] = tiles[ i ].DropShrinker();
+        }
+
+        await Task.WhenAll( tasks );
+
+        OnMatchHappened?.Invoke();
     }
 
     private List<Tile> FindMatchesOnRow( int rowIndex ) {
