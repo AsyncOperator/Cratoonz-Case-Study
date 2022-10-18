@@ -128,7 +128,10 @@ namespace Core {
                 Vector2Int firstRowColumn = grid.GetXY( selectedTile.transform.position );
                 Vector2Int secondRowColumn = grid.GetXY( targetTile.transform.position );
 
-                matcher.Match( firstRowColumn, secondRowColumn );
+                bool validSwipe = matcher.Match( firstRowColumn, secondRowColumn );
+                if ( !validSwipe ) {
+                    yield return dropMover.SwapTiles( selectedTile, targetTile );
+                }
             }
         }
     }
