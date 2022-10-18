@@ -13,6 +13,7 @@ public sealed class Tile : MonoBehaviour {
             await Drop.transform.DOScale( Vector3.zero, dropShrinkDuration ).OnComplete( () => {
                 Drop.DropData = null;
                 Drop.transform.localScale = Vector3.one;
+                Debug.Log( $"11" );
             } ).AsyncWaitForCompletion();
         }
     }

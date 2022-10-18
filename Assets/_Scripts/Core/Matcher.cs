@@ -1,24 +1,24 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Grid = Core.Grid<Tile>;
 using Core.Board;
-using System;
-using System.Threading.Tasks;
 
 public sealed class Matcher : MonoBehaviour {
     [Min( 3 ), SerializeField] private int repeatTimesToCountAsMatch;
 
     private Grid grid;
-    private int gridWidth, gridHeight;
+    private int gridRowCount, gridColumnCount;
 
     public event Action OnMatchHappened;
 
     private void OnEnable() {
         FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => {
             grid = g;
-            gridWidth = grid.Width;
-            gridHeight = grid.Height;
+            gridRowCount = grid.Row;
+            gridColumnCount = grid.Column;
         };
     }
 
@@ -79,64 +79,64 @@ public sealed class Matcher : MonoBehaviour {
     }
 
     private List<Tile> FindMatchesOnRow( int rowIndex ) {
-        List<Tile> tiles = new();
+        List<Tile> matchingTiles = new();
 
         Tile tileIterator = grid.GetValue( rowIndex, 0 );
         int indexIterator = 0;
         int repetationIterator = 1;
 
-        for ( int y = 1 ; y < gridHeight ; y++ ) {
-            Tile t = grid.GetValue( rowIndex, y );
+        for ( int c = 1 ; c < gridColumnCount ; c++ ) {
+            Tile t = grid.GetValue( rowIndex, c );
 
             if ( tileIterator.Drop.DropData == t.Drop.DropData ) {
                 repetationIterator++;
 
                 if ( repetationIterator >= repeatTimesToCountAsMatch ) {
                     for ( int i = 0 ; i < repetationIterator ; i++ ) {
-                        tiles.Add( grid.GetValue( rowIndex, indexIterator + i ) );
+                        matchingTiles.Add( grid.GetValue( rowIndex, indexIterator + i ) );
                     }
                 }
             }
 
             else {
-                indexIterator = y;
+                indexIterator = c;
                 repetationIterator = 1;
-                tileIterator = grid.GetValue( rowIndex, y );
+                tileIterator = grid.GetValue( rowIndex, c );
             }
         }
 
-        tiles = tiles.Distinct().ToList();
-        return tiles;
+        matchingTiles = matchingTiles.Distinct().ToList();
+        return matchingTiles;
     }
 
     private List<Tile> FindMatchesOnColumn( int columnIndex ) {
-        List<Tile> tiles = new();
+        List<Tile> matchingTiles = new();
 
         Tile tileIterator = grid.GetValue( 0, columnIndex );
         int indexIterator = 0;
         int repetationIterator = 1;
 
-        for ( int x = 1 ; x < gridWidth ; x++ ) {
-            Tile t = grid.GetValue( x, columnIndex );
+        for ( int r = 1 ; r < gridRowCount ; r++ ) {
+            Tile t = grid.GetValue( r, columnIndex );
 
             if ( tileIterator.Drop.DropData == t.Drop.DropData ) {
                 repetationIterator++;
 
                 if ( repetationIterator >= repeatTimesToCountAsMatch ) {
                     for ( int i = 0 ; i < repetationIterator ; i++ ) {
-                        tiles.Add( grid.GetValue( indexIterator + i, columnIndex ) );
+                        matchingTiles.Add( grid.GetValue( indexIterator + i, columnIndex ) );
                     }
                 }
             }
 
             else {
-                indexIterator = x;
+                indexIterator = r;
                 repetationIterator = 1;
-                tileIterator = grid.GetValue( x, columnIndex );
+                tileIterator = grid.GetValue( r, columnIndex );
             }
         }
 
-        tiles = tiles.Distinct().ToList();
-        return tiles;
+        matchingTiles = matchingTiles.Distinct().ToList();
+        return matchingTiles;
     }
 }
