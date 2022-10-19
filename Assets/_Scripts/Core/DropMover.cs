@@ -116,9 +116,9 @@ public sealed class DropMover : MonoBehaviour {
         tileDrop.transform.DOLocalMove( destination, swapDuration ).SetLoops( 2, LoopType.Yoyo ).OnStart( () => tileDrop.AlwaysVisible() ).OnComplete( () => tileDrop.ConstraintVisible() );
     }
 
-    public void MoveTo( Tile from, Tile to ) {
+    public async Task MoveTo( Tile from, Tile to ) {
         Drop fromDrop = from.Drop;
 
-        fromDrop.transform.DOMove( to.transform.position, dropDuration ).SetEase( Ease.OutBack );
+        await fromDrop.transform.DOMove( to.transform.position, dropDuration ).SetEase( Ease.OutBack ).AsyncWaitForCompletion();
     }
 }

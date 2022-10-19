@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Grid = Core.Grid<Tile>;
+using Random = UnityEngine.Random;
 using AsyncOperator.Extensions;
 
 namespace Core.Board {
@@ -22,6 +24,8 @@ namespace Core.Board {
         private int gridRowCount, gridColumnCount;
 
         private int[] spawnerColumns;
+
+        public event Action OnBoardUpdated;
 
         private void OnEnable() {
             matcher.OnMatchHappened += FindColumnsContainsEmptyTile;
@@ -111,6 +115,8 @@ namespace Core.Board {
                 await Task.WhenAll( tasks );
 
                 Spawn();
+
+                OnBoardUpdated?.Invoke();
             }
         }
 
@@ -138,14 +144,17 @@ namespace Core.Board {
 
         private async Task PushTiles( List<EmptyTileData> emptyTileDatas, int columnIndex ) {
             if ( emptyTileDatas.Count != 0 ) {
+                Task[] tasks = new Task[ emptyTileDatas.Count ];
+
                 for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
                     Tile fromTile = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
                     Tile toTile = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
 
-                    dropMover.MoveTo( fromTile, toTile );
+                    tasks[ i ] = dropMover.MoveTo( fromTile, toTile );
                 }
 
                 // This must be greater than dropMover dropDuration time
+                await Task.WhenAll( tasks );
                 await Task.Delay( 200 );
 
                 for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {

@@ -9,6 +9,7 @@ using Core.Board;
 public sealed class Matcher : MonoBehaviour {
     private const int REPEAT_TIMES_TO_COUNT_AS_MATCH = 3;
 
+    [SerializeField] private BoardSetter boardSetter;
     [SerializeField] private DropMover dropMover;
 
     private Grid grid;
@@ -17,6 +18,7 @@ public sealed class Matcher : MonoBehaviour {
     public event Action OnMatchHappened;
 
     private void OnEnable() {
+        boardSetter.OnBoardUpdated += TryFindMatchesOnWholeGrid;
         dropMover.OnSwapped += TryFindMatches;
 
         FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => {
@@ -24,6 +26,30 @@ public sealed class Matcher : MonoBehaviour {
             gridRowCount = grid.Row;
             gridColumnCount = grid.Column;
         };
+    }
+
+    private void TryFindMatchesOnWholeGrid() {
+        List<Tile> tiles = new();
+
+        for ( int r = 0 ; r < gridRowCount ; r++ ) {
+            var tmpList = FindMatchesOnRow( r );
+            if ( tmpList.Count != 0 ) {
+                tiles.AddRange( tmpList );
+            }
+        }
+
+        for ( int c = 0 ; c < gridColumnCount ; c++ ) {
+            var tmpList = FindMatchesOnColumn( c );
+            if ( tmpList.Count != 0 ) {
+                tiles.AddRange( tmpList );
+            }
+        }
+
+        tiles = tiles.Distinct().ToList();
+
+        if ( tiles.Count != 0 ) {
+            RemoveTilesDrop( tiles );
+        }
     }
 
     private bool TryFindMatches( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
