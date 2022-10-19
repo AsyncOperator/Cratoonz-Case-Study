@@ -14,6 +14,7 @@ namespace Core {
             Down
         }
 
+        // Stores valid directions based upon GDD, contains just only horizontal and vertical directions
         private static readonly ReadOnlyDictionary<DirectionType, Vector2> _PossibleDirectionsDict = new ReadOnlyDictionary<DirectionType, Vector2>( new Dictionary<DirectionType, Vector2> {
             { DirectionType.Right, Vector2.right },
             { DirectionType.Left, Vector2.left },

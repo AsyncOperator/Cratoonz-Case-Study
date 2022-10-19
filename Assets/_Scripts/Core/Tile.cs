@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using DG.Tweening;
 
-// Tile needs spriteRenderer to display sprite, make sense huh?
+// Tile needs spriteRenderer to display sprite
 [RequireComponent( typeof( SpriteRenderer ) )]
 public sealed class Tile : MonoBehaviour {
     [Tooltip( "Defines duration of tween" )]
@@ -10,6 +10,9 @@ public sealed class Tile : MonoBehaviour {
 
     public Drop Drop { get; set; }
 
+    /// <summary>
+    /// Scale down Drop property transform to zero then set Drop property's DropData to null
+    /// </summary>
     public async Task DropShrinker() {
         if ( Drop != null ) {
             await Drop.transform.DOScale( Vector3.zero, dropShrinkDuration ).OnComplete( () => {

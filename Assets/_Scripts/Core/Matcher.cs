@@ -9,6 +9,7 @@ using Core.Board;
 public sealed class Matcher : MonoBehaviour {
     private const int REPEAT_TIMES_TO_COUNT_AS_MATCH = 3;
 
+    [SerializeField] private BoardCreator boardCreator;
     [SerializeField] private BoardSetter boardSetter;
     [SerializeField] private DropMover dropMover;
 
@@ -21,7 +22,7 @@ public sealed class Matcher : MonoBehaviour {
         boardSetter.OnBoardUpdated += TryFindMatchesOnWholeGrid;
         dropMover.OnSwapped += TryFindMatches;
 
-        FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => {
+        boardCreator.OnBoardCreated += ( g ) => {
             grid = g;
             gridRowCount = grid.Row;
             gridColumnCount = grid.Column;
