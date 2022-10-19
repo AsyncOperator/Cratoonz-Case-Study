@@ -1,6 +1,6 @@
+using System.Collections;
 using UnityEngine;
 using DG.Tweening;
-using System.Collections;
 
 public sealed class DropMover : MonoBehaviour {
     [SerializeField] private float swapDuration;
@@ -23,6 +23,16 @@ public sealed class DropMover : MonoBehaviour {
         t2.Drop = t1drop;
     }
 
+    public void MoveTo( Tile from, Tile to ) {
+        Drop fromDrop = from.Drop;
+        Drop toDrop = to.Drop;
 
+        fromDrop.transform.parent = to.transform;
+        toDrop.transform.parent = from.transform;
 
+        fromDrop.transform.DOLocalMove( Vector3.zero, swapDuration ).SetEase( Ease.OutBack ).OnComplete( () => {
+            from.Drop = toDrop;
+            to.Drop = fromDrop;
+        } );
+    }
 }
