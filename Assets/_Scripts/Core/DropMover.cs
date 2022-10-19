@@ -3,7 +3,9 @@ using UnityEngine;
 using DG.Tweening;
 
 public sealed class DropMover : MonoBehaviour {
+    [Tooltip( "Time it takes to swap tiles between each other" )]
     [SerializeField] private float swapDuration;
+    [Tooltip( "Time it takes to drop tiles from above to below (this is fixed time, means no matter how high or low tile is dropped it will always take same amount of time)" )]
     [SerializeField] private float dropDuration;
 
     public IEnumerator SwapTiles( Tile t1, Tile t2 ) {
@@ -26,14 +28,7 @@ public sealed class DropMover : MonoBehaviour {
 
     public void MoveTo( Tile from, Tile to ) {
         Drop fromDrop = from.Drop;
-        Drop toDrop = to.Drop;
 
-        //fromDrop.transform.parent = to.transform;
-        //toDrop.transform.parent = from.transform;
-
-        fromDrop.transform.DOMove( to.transform.position, dropDuration ).SetEase( Ease.OutBack ).OnComplete( () => {
-            //from.Drop = toDrop;
-            //to.Drop = fromDrop;
-        } );
+        fromDrop.transform.DOMove( to.transform.position, dropDuration ).SetEase( Ease.OutBack );
     }
 }

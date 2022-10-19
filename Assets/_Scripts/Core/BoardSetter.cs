@@ -122,10 +122,9 @@ namespace Core.Board {
                         Tile toTile = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
 
                         dropMover.MoveTo( fromTile, toTile );
-
-                        //yield return new WaitForSeconds( 0.15f );
                     }
 
+                    // This must be greater than dropMover dropDuration time
                     yield return new WaitForSeconds( 0.2f );
 
                     for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
