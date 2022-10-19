@@ -4,6 +4,7 @@ using DG.Tweening;
 
 public sealed class DropMover : MonoBehaviour {
     [SerializeField] private float swapDuration;
+    [SerializeField] private float dropDuration;
 
     public IEnumerator SwapTiles( Tile t1, Tile t2 ) {
         Drop t1drop = t1.Drop;
@@ -27,12 +28,12 @@ public sealed class DropMover : MonoBehaviour {
         Drop fromDrop = from.Drop;
         Drop toDrop = to.Drop;
 
-        fromDrop.transform.parent = to.transform;
-        toDrop.transform.parent = from.transform;
+        //fromDrop.transform.parent = to.transform;
+        //toDrop.transform.parent = from.transform;
 
-        fromDrop.transform.DOLocalMove( Vector3.zero, swapDuration ).SetEase( Ease.OutBack ).OnComplete( () => {
-            from.Drop = toDrop;
-            to.Drop = fromDrop;
+        fromDrop.transform.DOMove( to.transform.position, dropDuration ).SetEase( Ease.OutBack ).OnComplete( () => {
+            //from.Drop = toDrop;
+            //to.Drop = fromDrop;
         } );
     }
 }

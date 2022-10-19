@@ -123,9 +123,27 @@ namespace Core.Board {
 
                         dropMover.MoveTo( fromTile, toTile );
 
-                        yield return new WaitForSeconds( 0.5f );
+                        //yield return new WaitForSeconds( 0.15f );
+                    }
+
+                    yield return new WaitForSeconds( 0.2f );
+
+                    for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
+                        Tile fromTile = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
+                        Tile toTile = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
+
+                        Drop fromTileDrop = fromTile.Drop;
+                        Drop toTileDrop = toTile.Drop;
+
+                        fromTileDrop.transform.parent = toTile.transform;
+                        toTileDrop.transform.parent = fromTile.transform;
+
+                        fromTile.Drop = toTileDrop;
+                        toTile.Drop = fromTileDrop;
                     }
                 }
+
+
             }
 
 
