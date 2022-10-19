@@ -1,17 +1,11 @@
 using System;
 using UnityEngine;
-using AsyncOperator.Extensions;
 
 namespace Core.Board {
-    [RequireComponent( typeof( BoardSetter ) )]
     public sealed class BoardCreator : MonoBehaviour {
-        [SerializeField] private BoardSetter boardSetter;
-
         #region Grid Settings
-        [Space( 10 )]
         [Header( "GRID SETTINGS" )]
-        [Space( 15 )]
-
+        [Space( 10 )]
         [Tooltip( "How many rows will be in the grid" )]
         [Min( 1 ), SerializeField] private int gridRowCount = 8;
         [Tooltip( "How many columns will be in the grid" )]
@@ -29,8 +23,7 @@ namespace Core.Board {
         public event Action<int[]> OnSpawnerColumnsGenerated;
 
         private void OnValidate() {
-            gameObject.GetComponent( ref boardSetter );
-
+            // Spawner columns validation
             for ( int i = 0 ; i < spawnerColumns.Length ; i++ ) {
                 if ( spawnerColumns[ i ] >= gridColumnCount ) {
                     Debug.LogError( $"Element at ({i}) You exceed grid column count, given value <color=red> ( {spawnerColumns[ i ]} ) </color> should be smaller than <color=red> ( {gridColumnCount} ) </color>" );
@@ -47,12 +40,10 @@ namespace Core.Board {
         private void Start() {
             grid = new Grid<Tile>( gridRowCount, gridColumnCount, gridTileSize, gridOrigin );
 
+            OnBoardCreated?.Invoke( grid );
             if ( spawnerColumns.Length != 0 ) {
                 OnSpawnerColumnsGenerated?.Invoke( spawnerColumns );
             }
-
-            boardSetter.SetBoard( grid );
-            OnBoardCreated?.Invoke( grid );
         }
     }
 }

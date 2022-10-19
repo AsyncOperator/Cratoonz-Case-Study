@@ -230,6 +230,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25e368dba841083429b8b28977502ccb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boardCreator: {fileID: 317593117}
+  matcher: {fileID: 906869080}
+  dropMover: {fileID: 1175029123}
   tilePf: {fileID: 7458588694631278805, guid: 0b4aad0c7870f164db897e0356c7cf86, type: 3}
   dropPf: {fileID: 618787914694770806, guid: 8609c49ee908f4e4e83a49353f9ed2d2, type: 3}
   dropSOs:
@@ -237,8 +240,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2023ec98c697d7b47bb76754126ae8f1, type: 2}
   - {fileID: 11400000, guid: 2f3754b6d58290440a6505c35f3314b1, type: 2}
   - {fileID: 11400000, guid: 9f6e37cd431dd6e44af50ba03149a318, type: 2}
-  dropMover: {fileID: 1175029123}
-  spawnerColumns: 
 --- !u!1 &636769705
 GameObject:
   m_ObjectHideFlags: 0
@@ -525,6 +526,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c581fbec4d1dda48ad5f9d864580f27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dropMover: {fileID: 1175029123}
 --- !u!4 &906869081
 Transform:
   m_ObjectHideFlags: 0
@@ -653,6 +655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d14113995aec8404287515fc3d1d2bc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  swiper: {fileID: 884920257}
   swapDuration: 0.3
   dropDuration: 0.1
 --- !u!4 &1175029124

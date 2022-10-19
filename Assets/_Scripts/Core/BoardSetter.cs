@@ -1,35 +1,44 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using Grid = Core.Grid<Tile>;
 using AsyncOperator.Extensions;
 
 namespace Core.Board {
     public sealed class BoardSetter : MonoBehaviour {
+        [SerializeField] private BoardCreator boardCreator;
+        [SerializeField] private Matcher matcher;
+        [SerializeField] private DropMover dropMover;
+
+        [Space( 20 )]
+
         [SerializeField] private Tile tilePf;
         [SerializeField] private Drop dropPf;
 
         [SerializeField] private DropSO[] dropSOs;
 
-        [SerializeField] private DropMover dropMover;
-
         private Grid grid;
-        private int gridRow, gridColumn;
+        private int gridRowCount, gridColumnCount;
 
-        [SerializeField] private int[] spawnerColumns;
+        private int[] spawnerColumns;
 
         private void OnEnable() {
-            FindObjectOfType<Matcher>().OnMatchHappened += FindEmptyTiles;
-            FindObjectOfType<BoardCreator>().OnSpawnerColumnsGenerated += ( spawnerArr ) => spawnerColumns = (int[])spawnerArr.Clone();
+            matcher.OnMatchHappened += FindColumnsContainsEmptyTile;
+            boardCreator.OnBoardCreated += SetBoard;
+
+            boardCreator.OnSpawnerColumnsGenerated += ( spawnerArr ) => {
+                var modifiedSpawnerArr = spawnerArr.Distinct().ToArray();
+                spawnerColumns = (int[])modifiedSpawnerArr.Clone();
+            };
         }
 
-        private void OnDisable() => FindObjectOfType<Matcher>().OnMatchHappened -= FindEmptyTiles;
+        private void OnDisable() => matcher.OnMatchHappened -= FindColumnsContainsEmptyTile;
 
-        public void SetBoard( Grid<Tile> g ) {
+        private void SetBoard( Grid<Tile> g ) {
             grid = g;
-            gridRow = grid.Row;
-            gridColumn = grid.Column;
+            gridRowCount = grid.Row;
+            gridColumnCount = grid.Column;
 
             // local caching
             Tile downTile = null;
@@ -39,8 +48,8 @@ namespace Core.Board {
 
             List<DropSO> dropSOscannotBeUsed = new();
 
-            for ( int r = 0 ; r < gridRow ; r++ ) {
-                for ( int c = 0 ; c < gridColumn ; c++ ) {
+            for ( int r = 0 ; r < gridRowCount ; r++ ) {
+                for ( int c = 0 ; c < gridColumnCount ; c++ ) {
 
                     // Since we are moving from left to right (row increment) and bottom to top (column increment),
                     // we can just check left and bottom neighbour of current tile to make decision of which dropData can be set for the current tile
@@ -76,12 +85,12 @@ namespace Core.Board {
             }
         }
 
-        private void FindEmptyTiles() {
+        private async void FindColumnsContainsEmptyTile() {
             Tile searchingTile = null;
             List<int> emptyColumns = new(); // Store columns indeces which contains some empty tiles
 
-            for ( int c = 0 ; c < gridColumn ; c++ ) {
-                for ( int r = 0 ; r < gridRow ; r++ ) {
+            for ( int c = 0 ; c < gridColumnCount ; c++ ) {
+                for ( int r = 0 ; r < gridRowCount ; r++ ) {
 
                     searchingTile = grid.GetValue( r, c );
                     // Finding one empty tile enough, since we gonna check every tile in that column when pushing down, so breaking the inside for loop
@@ -93,20 +102,26 @@ namespace Core.Board {
             }
 
             if ( emptyColumns.Count != 0 ) {
+                Task[] tasks = new Task[ emptyColumns.Count ];
+
                 for ( int i = 0 ; i < emptyColumns.Count ; i++ ) {
-                    Debug.Log( $"Empty column {emptyColumns[ i ]}" );
-                    PushTopTiles( emptyColumns[ i ] );
+                    //Debug.Log( $"Empty column {emptyColumns[ i ]}" );
+                    tasks[ i ] = FindTilesWillBePushed( emptyColumns[ i ] );
                 }
+
+                await Task.WhenAll( tasks );
+
+                Spawn();
             }
         }
 
-        private void PushTopTiles( int columnIndex ) {
+        private async Task FindTilesWillBePushed( int columnIndex ) {
             Tile searchingTile = null;
             int emptyTileCount = 0;
 
             List<EmptyTileData> emptyTileDatas = new();
 
-            for ( int r = 0 ; r < gridRow ; r++ ) {
+            for ( int r = 0 ; r < gridRowCount ; r++ ) {
                 searchingTile = grid.GetValue( r, columnIndex );
                 if ( searchingTile.Drop.DropData == null ) {
                     emptyTileCount++;
@@ -119,50 +134,50 @@ namespace Core.Board {
                 }
             }
 
-            StartCoroutine( PushCO() );
+            await PushTiles( emptyTileDatas, columnIndex );
+        }
 
-            IEnumerator PushCO() {
-                if ( emptyTileDatas.Count != 0 ) {
-                    for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
-                        Tile fromTile = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
-                        Tile toTile = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
+        private async Task PushTiles( List<EmptyTileData> emptyTileDatas, int columnIndex ) {
+            if ( emptyTileDatas.Count != 0 ) {
+                for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
+                    Tile fromTile = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
+                    Tile toTile = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
 
-                        dropMover.MoveTo( fromTile, toTile );
+                    dropMover.MoveTo( fromTile, toTile );
+                }
+
+                // This must be greater than dropMover dropDuration time
+                await Task.Delay( 200 );
+
+                for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
+                    Tile fromTile = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
+                    Tile toTile = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
+
+                    Drop fromTileDrop = fromTile.Drop;
+                    Drop toTileDrop = toTile.Drop;
+
+                    fromTileDrop.transform.parent = toTile.transform;
+                    toTileDrop.transform.parent = fromTile.transform;
+
+                    toTileDrop.transform.ResetTransformation();
+                    fromTileDrop.transform.ResetTransformation();
+
+                    fromTile.Drop = toTileDrop;
+                    toTile.Drop = fromTileDrop;
+                }
+            }
+        }
+
+        private void Spawn() {
+            for ( int i = 0 ; i < spawnerColumns.Length ; i++ ) {
+                for ( int r = gridRowCount - 1 ; r >= 0 ; r-- ) {
+                    Tile check = grid.GetValue( r, spawnerColumns[ i ] );
+
+                    if ( check.Drop.DropData == null ) {
+                        check.Drop.DropData = dropSOs[ Random.Range( 0, dropSOs.Length ) ];
                     }
-
-                    // This must be greater than dropMover dropDuration time
-                    yield return new WaitForSeconds( 0.2f );
-
-                    for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
-                        Tile fromTile = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
-                        Tile toTile = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
-
-                        Drop fromTileDrop = fromTile.Drop;
-                        Drop toTileDrop = toTile.Drop;
-
-                        fromTileDrop.transform.parent = toTile.transform;
-                        toTileDrop.transform.parent = fromTile.transform;
-
-                        toTileDrop.transform.ResetTransformation();
-                        fromTileDrop.transform.ResetTransformation();
-
-                        fromTile.Drop = toTileDrop;
-                        toTile.Drop = fromTileDrop;
-                    }
-
-                    // Fill empty top tiles
-                    for ( int i = 0 ; i < spawnerColumns.Length ; i++ ) {
-                        for ( int r = gridRow - 1 ; r >= 0 ; r-- ) {
-                            Tile check = grid.GetValue( r, spawnerColumns[ i ] );
-
-                            if ( check.Drop.DropData == null ) {
-                                check.Drop.DropData = dropSOs[ Random.Range( 0, dropSOs.Length ) ];
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
+                    else {
+                        break;
                     }
                 }
             }

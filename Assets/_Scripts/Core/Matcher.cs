@@ -9,12 +9,16 @@ using Core.Board;
 public sealed class Matcher : MonoBehaviour {
     private const int REPEAT_TIMES_TO_COUNT_AS_MATCH = 3;
 
+    [SerializeField] private DropMover dropMover;
+
     private Grid grid;
     private int gridRowCount, gridColumnCount;
 
     public event Action OnMatchHappened;
 
     private void OnEnable() {
+        dropMover.OnSwapped += Match;
+
         FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => {
             grid = g;
             gridRowCount = grid.Row;
@@ -22,7 +26,7 @@ public sealed class Matcher : MonoBehaviour {
         };
     }
 
-    public bool Match( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
+    private bool Match( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
         List<Tile> tiles = new();
         List<Tile> returnedTile = new();
 
@@ -55,7 +59,6 @@ public sealed class Matcher : MonoBehaviour {
 
         tiles = tiles.Distinct().ToList();
 
-        Debug.Log( tiles.Count );
         // Remove dropData inside tiles list
         if ( tiles.Count != 0 ) {
             RemoveTilesDrop( tiles );
@@ -74,7 +77,6 @@ public sealed class Matcher : MonoBehaviour {
         }
 
         await Task.WhenAll( tasks );
-        await Task.Delay( 100 ); // 0.2f
 
         OnMatchHappened?.Invoke();
     }

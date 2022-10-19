@@ -1,14 +1,12 @@
-using UnityEngine;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Core.Board;
-using Grid = Core.Grid<Tile>;
+using UnityEngine;
 using AsyncOperator.Helpers;
 
 namespace Core {
     public sealed class Swiper : MonoBehaviour {
-        private enum DirectionType {
+        public enum DirectionType {
             None,
             Right,
             Left,
@@ -16,63 +14,45 @@ namespace Core {
             Down
         }
 
-        private static readonly ReadOnlyDictionary<DirectionType, Vector2> _DirectionsDict = new ReadOnlyDictionary<DirectionType, Vector2>( new Dictionary<DirectionType, Vector2> {
+        private static readonly ReadOnlyDictionary<DirectionType, Vector2> _PossibleDirectionsDict = new ReadOnlyDictionary<DirectionType, Vector2>( new Dictionary<DirectionType, Vector2> {
             { DirectionType.Right, Vector2.right },
             { DirectionType.Left, Vector2.left },
             { DirectionType.Up, Vector2.up },
             { DirectionType.Down, Vector2.down }
         } );
 
+        /// <summary>
+        /// We use this value when comparing the vectors in readonly collections with the vector calculated based on data we got from InputManager,
+        /// Ex: so let's pick a vector inside collection (Vector2.right) and let's assume the calculated vector is (0.3f, 0.7f) so then we check the angle between these vector and if the angle we got is bigger than this value
+        /// we skip that vector which is not the one we are looking for
+        /// </summary>
+        [Tooltip( "Angle in degrees" )]
         [Range( 10f, 40f ), SerializeField] private float angleThreshold;
         [SerializeField] private Matcher matcher;
         [SerializeField] private DropMover dropMover;
 
-        private Tile selectedTile;
         private Vector2 touchStartPosition;
         private Vector2 touchEndPosition;
 
-        private Grid grid;
+        public event Action<Vector2, DirectionType> OnSwipeCalculated;
 
         private void OnEnable() {
-            FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => grid = g;
-
             InputManager.OnTouchStartPosition += InputManager_OnTouchStartPosition;
             InputManager.OnTouchCancelPosition += InputManager_OnTouchCancelPosition;
         }
 
         private void OnDisable() {
-            FindObjectOfType<BoardCreator>().OnBoardCreated -= ( g ) => grid = g;
-
             InputManager.OnTouchStartPosition -= InputManager_OnTouchStartPosition;
             InputManager.OnTouchCancelPosition -= InputManager_OnTouchCancelPosition;
         }
 
         private void InputManager_OnTouchStartPosition( Vector2 touchStartPosition ) {
+            // Camera.main is safe no longer generate garbage
             this.touchStartPosition = Helpers.ConvertPixelCoordinateToWorldPosition( Camera.main, touchStartPosition );
-            RaycastHit2D hit = Physics2D.Raycast( this.touchStartPosition, Vector2.zero );
-
-            // If ray hit something
-            if ( hit.transform != null ) {
-                // Try get Tile component from hit gameObject
-                if ( hit.transform.TryGetComponent( out Tile tile ) ) {
-                    // Then check whether the tile contains some drop inside then it is a valid tile
-                    selectedTile = tile.Drop?.DropData != null ? tile : null;
-                }
-                else {
-                    selectedTile = null;
-                }
-            }
-            // If ray did not hit anything ~means player clicking somewhere outside of the grid boundaries
-            else {
-                selectedTile = null;
-            }
         }
 
         private void InputManager_OnTouchCancelPosition( Vector2 touchEndPosition ) {
-            if ( selectedTile == null ) {
-                return;
-            }
-
+            // Camera.main is safe no longer generate garbage
             this.touchEndPosition = Helpers.ConvertPixelCoordinateToWorldPosition( Camera.main, touchEndPosition );
             CalculateSwipeDirection();
         }
@@ -82,56 +62,22 @@ namespace Core {
             // To visualize swipe in scene view ~dont forget to enable gizmos
             Debug.DrawLine( touchStartPosition, touchEndPosition, Color.blue, 10f );
 #endif
-            Vector2 direction = ( touchEndPosition - touchStartPosition ).normalized;
 
+            Vector2 swipeDirection = ( touchEndPosition - touchStartPosition ).normalized;
             float minAngle = float.PositiveInfinity;
             DirectionType swipeDirectionType = DirectionType.None;
 
-            foreach ( KeyValuePair<DirectionType, Vector2> kvp in _DirectionsDict ) {
-                float angleBetween = Vector2.Angle( direction, kvp.Value );
+            // Try find direction based upon player's input
+            foreach ( KeyValuePair<DirectionType, Vector2> kvp in _PossibleDirectionsDict ) {
+                float angleBetween = Vector2.Angle( swipeDirection, kvp.Value );
                 if ( angleBetween <= angleThreshold && angleBetween < minAngle ) {
-                    minAngle = angleBetween;
-                    swipeDirectionType = kvp.Key;
+                    minAngle = angleBetween;    // Update minAngle
+                    swipeDirectionType = kvp.Key;   // Update swipeDirection
                 }
             }
-
-            // Swap
 
             if ( swipeDirectionType != DirectionType.None ) {
-                Tile targetTile = null;
-
-                Vector2Int selectedTileXY = grid.GetXY( selectedTile.transform.position );
-
-                switch ( swipeDirectionType ) {
-                    case DirectionType.Right:
-                        targetTile = grid.RightNeighbour( selectedTileXY.x, selectedTileXY.y );
-                        break;
-                    case DirectionType.Left:
-                        targetTile = grid.LeftNeighbour( selectedTileXY.x, selectedTileXY.y );
-                        break;
-                    case DirectionType.Up:
-                        targetTile = grid.UpNeighbour( selectedTileXY.x, selectedTileXY.y );
-                        break;
-                    case DirectionType.Down:
-                        targetTile = grid.DownNeighbour( selectedTileXY.x, selectedTileXY.y );
-                        break;
-                }
-                if ( targetTile?.Drop?.DropData != null ) {
-                    StartCoroutine( Swap( targetTile ) );
-                }
-            }
-
-            IEnumerator Swap( Tile targetTile ) {
-                // Wait for tween finished to call matcher
-                yield return dropMover.SwapTiles( selectedTile, targetTile );
-
-                Vector2Int firstRowColumn = grid.GetXY( selectedTile.transform.position );
-                Vector2Int secondRowColumn = grid.GetXY( targetTile.transform.position );
-
-                bool validSwipe = matcher.Match( firstRowColumn, secondRowColumn );
-                if ( !validSwipe ) {
-                    yield return dropMover.SwapTiles( selectedTile, targetTile );
-                }
+                OnSwipeCalculated( touchStartPosition, swipeDirectionType );
             }
         }
     }

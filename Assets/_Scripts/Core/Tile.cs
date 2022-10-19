@@ -1,10 +1,9 @@
+using System.Threading.Tasks;
 using UnityEngine;
 using DG.Tweening;
-using System.Threading.Tasks;
 
-// Tile needs collider to be detected by raycast
 // Tile needs spriteRenderer to display sprite, make sense huh?
-[RequireComponent( typeof( BoxCollider2D ), typeof( SpriteRenderer ) )]
+[RequireComponent( typeof( SpriteRenderer ) )]
 public sealed class Tile : MonoBehaviour {
     [Tooltip( "Defines duration of tween" )]
     [SerializeField] private float dropShrinkDuration;
