@@ -17,7 +17,7 @@ public sealed class Matcher : MonoBehaviour {
     public event Action OnMatchHappened;
 
     private void OnEnable() {
-        dropMover.OnSwapped += Match;
+        dropMover.OnSwapped += TryFindMatches;
 
         FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => {
             grid = g;
@@ -26,7 +26,7 @@ public sealed class Matcher : MonoBehaviour {
         };
     }
 
-    private bool Match( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
+    private bool TryFindMatches( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
         List<Tile> tiles = new();
         List<Tile> returnedTile = new();
 

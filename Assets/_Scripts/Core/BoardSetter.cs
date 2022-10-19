@@ -105,7 +105,6 @@ namespace Core.Board {
                 Task[] tasks = new Task[ emptyColumns.Count ];
 
                 for ( int i = 0 ; i < emptyColumns.Count ; i++ ) {
-                    //Debug.Log( $"Empty column {emptyColumns[ i ]}" );
                     tasks[ i ] = FindTilesWillBePushed( emptyColumns[ i ] );
                 }
 
@@ -177,6 +176,7 @@ namespace Core.Board {
                         check.Drop.DropData = dropSOs[ Random.Range( 0, dropSOs.Length ) ];
                     }
                     else {
+                        // Since we pushed tiles before spawning new ones we now that when we are start searching from top to bottom the first not null tile is the indication of that all the others in below that are also full so no need to check return early
                         break;
                     }
                 }
