@@ -9,6 +9,6 @@ public sealed class DropSO : ScriptableObject {
         Yellow
     }
 
-    public Sprite dropSprite;
-    public DropType dropType;
+    [field: SerializeField] public Sprite DropSprite { get; private set; }
+    [field: SerializeField] public DropType _DropType { get; private set; }
 }
