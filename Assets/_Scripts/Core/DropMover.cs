@@ -1,13 +1,15 @@
 using System;
-using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using Core;
 using Core.Board;
 using DG.Tweening;
-using System.Threading.Tasks;
 
 public sealed class DropMover : MonoBehaviour {
     [SerializeField] private Swiper swiper;
+    [SerializeField] private BoardCreator boardCreator;
+
+    [Space( 20 )]
 
     [Tooltip( "Time it takes to swap tiles between each other" )]
     [SerializeField] private float swapDuration;
@@ -19,12 +21,12 @@ public sealed class DropMover : MonoBehaviour {
     public event Func<Vector2Int, Vector2Int, bool> OnSwapped;
 
     private void OnEnable() {
-        FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => grid = g;
         swiper.OnSwipeCalculated += Swiper_OnSwipeCalculated;
+
+        boardCreator.OnBoardCreated += ( g ) => grid = g;
     }
 
     private void OnDisable() {
-        FindObjectOfType<BoardCreator>().OnBoardCreated += ( g ) => grid = g;
         swiper.OnSwipeCalculated -= Swiper_OnSwipeCalculated;
     }
 
@@ -52,12 +54,15 @@ public sealed class DropMover : MonoBehaviour {
                 targetTile = grid.DownNeighbour( selectedTileXY.x, selectedTileXY.y );
                 break;
         }
-        if ( targetTile?.Drop?.DropData != null ) {
+        if ( targetTile == null ) {
+            FakeMoveTo( selectedTile, swipeDirection );
+        }
+        else if ( targetTile.Drop?.DropData != null ) {
             Sequence( selectedTile, targetTile );
         }
 
         async void Sequence( Tile t1, Tile t2 ) {
-            await SwapTiles( t1, t2 );
+            await SwapDrops( t1, t2 );
 
             Vector2Int firstRowColumn = grid.GetXY( t1.transform.position );
             Vector2Int secondRowColumn = grid.GetXY( t2.transform.position );
@@ -65,12 +70,12 @@ public sealed class DropMover : MonoBehaviour {
             bool? valid = OnSwapped?.Invoke( firstRowColumn, secondRowColumn );
 
             if ( valid == false ) {
-                await SwapTiles( t1, t2 );
+                await SwapDrops( t1, t2 );
             }
         }
     }
 
-    public async Task SwapTiles( Tile t1, Tile t2 ) {
+    private async Task SwapDrops( Tile t1, Tile t2 ) {
         Drop t1drop = t1.Drop;
         Drop t2drop = t2.Drop;
 
@@ -86,6 +91,29 @@ public sealed class DropMover : MonoBehaviour {
 
         t1.Drop = t2drop;
         t2.Drop = t1drop;
+    }
+
+    private void FakeMoveTo( Tile tile, Swiper.DirectionType direction ) {
+        Drop tileDrop = tile.Drop;
+        Vector2 destination = Vector2.zero;
+
+        switch ( direction ) {
+            case Swiper.DirectionType.Right:
+                destination = new Vector2( grid.TileSize / 2, 0 );
+                break;
+            case Swiper.DirectionType.Left:
+                destination = new Vector2( -grid.TileSize / 2, 0 );
+                break;
+            case Swiper.DirectionType.Up:
+                destination = new Vector2( 0, grid.TileSize / 2 );
+                break;
+            case Swiper.DirectionType.Down:
+                destination = new Vector2( 0, -grid.TileSize / 2 );
+                break;
+        }
+
+        // Before moving drop outside of the grid make it mask interaction to none after then set it visibleInsideMask again
+        tileDrop.transform.DOLocalMove( destination, swapDuration ).SetLoops( 2, LoopType.Yoyo ).OnStart( () => tileDrop.AlwaysVisible() ).OnComplete( () => tileDrop.ConstraintVisible() );
     }
 
     public void MoveTo( Tile from, Tile to ) {

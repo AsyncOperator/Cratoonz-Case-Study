@@ -22,4 +22,8 @@ public sealed class Drop : MonoBehaviour {
     #endregion
 
     private void OnValidate() => gameObject.GetComponent( ref spriteRenderer );
+
+    public void AlwaysVisible() => spriteRenderer.maskInteraction = SpriteMaskInteraction.None;
+
+    public void ConstraintVisible() => spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
 }

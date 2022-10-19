@@ -9,6 +9,8 @@ namespace Core {
         public int Column => column;
 
         private float tileSize;
+        public float TileSize => tileSize;
+
         private Vector3 origin;
 
         private T[,] tileArr;

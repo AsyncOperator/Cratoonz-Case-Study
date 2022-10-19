@@ -28,8 +28,6 @@ namespace Core {
         /// </summary>
         [Tooltip( "Angle in degrees" )]
         [Range( 10f, 40f ), SerializeField] private float angleThreshold;
-        [SerializeField] private Matcher matcher;
-        [SerializeField] private DropMover dropMover;
 
         private Vector2 touchStartPosition;
         private Vector2 touchEndPosition;

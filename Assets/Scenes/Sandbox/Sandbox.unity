@@ -197,7 +197,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 188b01a8947ba484e9fa047b6d278480, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardSetter: {fileID: 317593119}
   gridRowCount: 8
   gridColumnCount: 8
   gridTileSize: 1
@@ -480,8 +479,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   angleThreshold: 30
-  matcher: {fileID: 906869080}
-  dropMover: {fileID: 1175029123}
 --- !u!4 &884920258
 Transform:
   m_ObjectHideFlags: 0
@@ -656,6 +653,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   swiper: {fileID: 884920257}
+  boardCreator: {fileID: 317593117}
   swapDuration: 0.3
   dropDuration: 0.1
 --- !u!4 &1175029124
