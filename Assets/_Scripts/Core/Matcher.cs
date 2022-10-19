@@ -74,6 +74,7 @@ public sealed class Matcher : MonoBehaviour {
         }
 
         await Task.WhenAll( tasks );
+        await Task.Delay( 100 ); // 0.2f
 
         OnMatchHappened?.Invoke();
     }
