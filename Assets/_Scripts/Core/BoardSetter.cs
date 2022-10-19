@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,6 +10,8 @@ namespace Core.Board {
         [SerializeField] private Drop dropPf;
 
         [SerializeField] private DropSO[] dropSOs;
+
+        [SerializeField] private DropMover dropMover;
 
         private Grid grid;
         private int gridRow, gridColumn;
@@ -83,10 +86,9 @@ namespace Core.Board {
                 }
             }
 
-            emptyColumns = emptyColumns.Distinct().ToList();
-
             if ( emptyColumns.Count != 0 ) {
                 for ( int i = 0 ; i < emptyColumns.Count ; i++ ) {
+                    Debug.Log( $"Empty column {emptyColumns[ i ]}" );
                     PushTopTiles( emptyColumns[ i ] );
                 }
             }
@@ -105,20 +107,27 @@ namespace Core.Board {
                 }
                 else {
                     if ( emptyTileCount != 0 ) {
-                        emptyTileDatas.Add( new EmptyTileData( r, emptyTileCount ) );
+                        var data = new EmptyTileData( r, emptyTileCount );
+                        emptyTileDatas.Add( data );
                     }
                 }
             }
 
-            if ( emptyTileDatas.Count != 0 ) {
-                for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
-                    Tile tileToPush = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
-                    Tile t = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
+            StartCoroutine( PushCO() );
 
-                    t.Drop.DropData = tileToPush.Drop.DropData;
-                    tileToPush.Drop.DropData = null;
+            IEnumerator PushCO() {
+                if ( emptyTileDatas.Count != 0 ) {
+                    for ( int i = 0 ; i < emptyTileDatas.Count ; i++ ) {
+                        Tile fromTile = grid.GetValue( emptyTileDatas[ i ].RowIndex, columnIndex );
+                        Tile toTile = grid.GetValue( emptyTileDatas[ i ].RowIndex - emptyTileDatas[ i ].EmptyTileCount, columnIndex );
+
+                        dropMover.MoveTo( fromTile, toTile );
+
+                        yield return new WaitForSeconds( 0.5f );
+                    }
                 }
             }
+
 
             //// Fill empty top tiles
             //for ( int x = 0 ; x < gridWidth ; x++ ) {
