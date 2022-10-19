@@ -16,6 +16,8 @@ public sealed class Matcher : MonoBehaviour {
     private Grid grid;
     private int gridRowCount, gridColumnCount;
 
+    private List<Tile> tiles = new();
+
     public event Action OnMatchHappened;
 
     private void OnEnable() {
@@ -30,20 +32,14 @@ public sealed class Matcher : MonoBehaviour {
     }
 
     private void TryFindMatchesOnWholeGrid() {
-        List<Tile> tiles = new();
-
         for ( int r = 0 ; r < gridRowCount ; r++ ) {
-            var tmpList = FindMatchesOnRow( r );
-            if ( tmpList.Count != 0 ) {
-                tiles.AddRange( tmpList );
-            }
+            FindMatchesOnRow( tiles, r );
+            tiles.AddRange( tiles );
         }
 
         for ( int c = 0 ; c < gridColumnCount ; c++ ) {
-            var tmpList = FindMatchesOnColumn( c );
-            if ( tmpList.Count != 0 ) {
-                tiles.AddRange( tmpList );
-            }
+            FindMatchesOnColumn( tiles, c );
+            tiles.AddRange( tiles );
         }
 
         tiles = tiles.Distinct().ToList();
@@ -54,35 +50,10 @@ public sealed class Matcher : MonoBehaviour {
     }
 
     private bool TryFindMatches( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
-        List<Tile> tiles = new();
-        List<Tile> returnedTile = new();
-
-        returnedTile = FindMatchesOnRow( firstRowColumn.x );
-
-        for ( int i = 0 ; i < returnedTile.Count ; i++ ) {
-            tiles.Add( returnedTile[ i ] );
-        }
-
-        returnedTile.Clear();
-        returnedTile = FindMatchesOnColumn( firstRowColumn.y );
-
-        for ( int i = 0 ; i < returnedTile.Count ; i++ ) {
-            tiles.Add( returnedTile[ i ] );
-        }
-
-        returnedTile.Clear();
-        returnedTile = FindMatchesOnRow( secondRowColumn.x );
-
-        for ( int i = 0 ; i < returnedTile.Count ; i++ ) {
-            tiles.Add( returnedTile[ i ] );
-        }
-
-        returnedTile.Clear();
-        returnedTile = FindMatchesOnColumn( secondRowColumn.y );
-
-        for ( int i = 0 ; i < returnedTile.Count ; i++ ) {
-            tiles.Add( returnedTile[ i ] );
-        }
+        FindMatchesOnRow( tiles, firstRowColumn.x );
+        FindMatchesOnColumn( tiles, firstRowColumn.y );
+        FindMatchesOnRow( tiles, secondRowColumn.x );
+        FindMatchesOnColumn( tiles, secondRowColumn.y );
 
         tiles = tiles.Distinct().ToList();
 
@@ -105,18 +76,20 @@ public sealed class Matcher : MonoBehaviour {
 
         await Task.WhenAll( tasks );
 
+        tiles.Clear();
+
         OnMatchHappened?.Invoke();
     }
 
-    private List<Tile> FindMatchesOnRow( int rowIndex ) {
-        List<Tile> matchingTiles = new();
-
+    private void FindMatchesOnRow( List<Tile> tiles, int rowIndex ) {
         Tile headTile = null;
+        Tile currentTile = null;
+
         int columnIndex = 0;
         int repetitionTimes = 1;
 
         for ( int c = 0 ; c < gridColumnCount ; c++ ) {
-            Tile currentTile = grid.GetValue( rowIndex, c );
+            currentTile = grid.GetValue( rowIndex, c );
 
             // If head tile is not null and current tile we are searching has a valid dropData
             if ( headTile == null && currentTile?.Drop?.DropData != null ) {
@@ -130,7 +103,7 @@ public sealed class Matcher : MonoBehaviour {
 
                 if ( repetitionTimes >= REPEAT_TIMES_TO_COUNT_AS_MATCH ) {
                     for ( int i = 0 ; i < repetitionTimes ; i++ ) {
-                        matchingTiles.Add( grid.GetValue( rowIndex, columnIndex + i ) );
+                        tiles.Add( grid.GetValue( rowIndex, columnIndex + i ) );
                     }
                 }
             }
@@ -141,20 +114,17 @@ public sealed class Matcher : MonoBehaviour {
                 repetitionTimes = 1;
             }
         }
-
-        matchingTiles = matchingTiles.Distinct().ToList();
-        return matchingTiles;
     }
 
-    private List<Tile> FindMatchesOnColumn( int columnIndex ) {
-        List<Tile> matchingTiles = new();
-
+    private void FindMatchesOnColumn( List<Tile> tiles, int columnIndex ) {
         Tile headTile = null;
+        Tile currentTile = null;
+
         int rowIndex = 0;
         int repetitionTimes = 1;
 
         for ( int r = 0 ; r < gridRowCount ; r++ ) {
-            Tile currentTile = grid.GetValue( r, columnIndex );
+            currentTile = grid.GetValue( r, columnIndex );
 
             // If head tile is not null and current tile we are searching has a valid dropData
             if ( headTile == null && currentTile?.Drop?.DropData != null ) {
@@ -168,7 +138,7 @@ public sealed class Matcher : MonoBehaviour {
 
                 if ( repetitionTimes >= REPEAT_TIMES_TO_COUNT_AS_MATCH ) {
                     for ( int i = 0 ; i < repetitionTimes ; i++ ) {
-                        matchingTiles.Add( grid.GetValue( rowIndex + i, columnIndex ) );
+                        tiles.Add( grid.GetValue( rowIndex + i, columnIndex ) );
                     }
                 }
             }
@@ -179,8 +149,5 @@ public sealed class Matcher : MonoBehaviour {
                 repetitionTimes = 1;
             }
         }
-
-        matchingTiles = matchingTiles.Distinct().ToList();
-        return matchingTiles;
     }
 }
