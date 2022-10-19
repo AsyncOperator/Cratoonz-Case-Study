@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Grid = Core.Grid<Tile>;
+using AsyncOperator.Extensions;
 
 namespace Core.Board {
     public sealed class BoardSetter : MonoBehaviour {
@@ -16,7 +17,12 @@ namespace Core.Board {
         private Grid grid;
         private int gridRow, gridColumn;
 
-        private void OnEnable() => FindObjectOfType<Matcher>().OnMatchHappened += FindEmptyTiles;
+        [SerializeField] private int[] spawnerColumns;
+
+        private void OnEnable() {
+            FindObjectOfType<Matcher>().OnMatchHappened += FindEmptyTiles;
+            FindObjectOfType<BoardCreator>().OnSpawnerColumnsGenerated += ( spawnerArr ) => spawnerColumns = (int[])spawnerArr.Clone();
+        }
 
         private void OnDisable() => FindObjectOfType<Matcher>().OnMatchHappened -= FindEmptyTiles;
 
@@ -137,23 +143,29 @@ namespace Core.Board {
                         fromTileDrop.transform.parent = toTile.transform;
                         toTileDrop.transform.parent = fromTile.transform;
 
+                        toTileDrop.transform.ResetTransformation();
+                        fromTileDrop.transform.ResetTransformation();
+
                         fromTile.Drop = toTileDrop;
                         toTile.Drop = fromTileDrop;
                     }
+
+                    // Fill empty top tiles
+                    for ( int i = 0 ; i < spawnerColumns.Length ; i++ ) {
+                        for ( int r = gridRow - 1 ; r >= 0 ; r-- ) {
+                            Tile check = grid.GetValue( r, spawnerColumns[ i ] );
+
+                            if ( check.Drop.DropData == null ) {
+                                check.Drop.DropData = dropSOs[ Random.Range( 0, dropSOs.Length ) ];
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                    }
                 }
-
-
             }
-
-
-            //// Fill empty top tiles
-            //for ( int x = 0 ; x < gridWidth ; x++ ) {
-            //    Tile t = grid.GetValue( x, columnIndex );
-            //    if ( t?.Drop?.DropData == null ) {
-            //        Debug.Log( "Hakan" );
-            //        t.Drop.DropData = dropSOs[ Random.Range( 0, dropSOs.Length ) ];
-            //    }
-            //}
         }
 
         private struct EmptyTileData {
