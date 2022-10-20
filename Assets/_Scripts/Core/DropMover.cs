@@ -30,11 +30,14 @@ public sealed class DropMover : MonoBehaviour {
         swiper.OnSwipeCalculated -= Swiper_OnSwipeCalculated;
     }
 
-    private void Swiper_OnSwipeCalculated( Vector2 worldPosition, Swiper.DirectionType swipeDirection ) {
+    private async void Swiper_OnSwipeCalculated( Vector2 worldPosition, Swiper.DirectionType swipeDirection ) {
         Tile selectedTile = grid.GetValue( worldPosition );
 
         if ( selectedTile == null ) {
             return;
+        }
+        else {
+            InputManager.Instance.Enabled = false;
         }
 
         Tile targetTile = null;
@@ -55,7 +58,8 @@ public sealed class DropMover : MonoBehaviour {
                 break;
         }
         if ( targetTile == null ) {
-            FakeMoveTo( selectedTile, swipeDirection );
+            await FakeMoveTo( selectedTile, swipeDirection );
+            InputManager.Instance.Enabled = true;
         }
         else if ( targetTile.Drop?.DropData != null ) {
             Sequence( selectedTile, targetTile );
@@ -71,6 +75,7 @@ public sealed class DropMover : MonoBehaviour {
 
             if ( valid == false ) {
                 await SwapDrops( t1, t2 );
+                InputManager.Instance.Enabled = true;
             }
         }
     }
@@ -93,7 +98,7 @@ public sealed class DropMover : MonoBehaviour {
         t2.Drop = t1drop;
     }
 
-    private void FakeMoveTo( Tile tile, Swiper.DirectionType direction ) {
+    private async Task FakeMoveTo( Tile tile, Swiper.DirectionType direction ) {
         Drop tileDrop = tile.Drop;
         Vector2 destination = Vector2.zero;
 
@@ -113,7 +118,7 @@ public sealed class DropMover : MonoBehaviour {
         }
 
         // Before moving drop outside of the grid make it mask interaction to none after then set it visibleInsideMask again
-        tileDrop.transform.DOLocalMove( destination, swapDuration ).SetLoops( 2, LoopType.Yoyo ).OnStart( () => tileDrop.AlwaysVisible() ).OnComplete( () => tileDrop.ConstraintVisible() );
+        await tileDrop.transform.DOLocalMove( destination, swapDuration ).SetLoops( 2, LoopType.Yoyo ).OnStart( () => tileDrop.AlwaysVisible() ).OnComplete( () => tileDrop.ConstraintVisible() ).AsyncWaitForCompletion();
     }
 
     public async Task MoveTo( Tile from, Tile to ) {

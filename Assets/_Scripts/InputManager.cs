@@ -8,6 +8,8 @@ using AsyncOperator.Singleton;
 public sealed class InputManager : Singleton<InputManager> {
     private InputControls inputControls;
 
+    public bool Enabled { get; set; } = true;
+
     public static event Action<Vector2> OnTouchStartPosition;
     public static event Action<Vector2> OnTouchCancelPosition;
 
@@ -30,7 +32,15 @@ public sealed class InputManager : Singleton<InputManager> {
         inputControls.Disable();
     }
 
-    private void OnTouchStarted( InputAction.CallbackContext ctx ) => OnTouchStartPosition?.Invoke( inputControls.Swipe.TouchPosition.ReadValue<Vector2>() );
+    private void OnTouchStarted( InputAction.CallbackContext ctx ) {
+        if ( Enabled ) {
+            OnTouchStartPosition?.Invoke( inputControls.Swipe.TouchPosition.ReadValue<Vector2>() );
+        }
+    }
 
-    private void OnTouchCancelled( InputAction.CallbackContext ctx ) => OnTouchCancelPosition?.Invoke( inputControls.Swipe.TouchPosition.ReadValue<Vector2>() );
+    private void OnTouchCancelled( InputAction.CallbackContext ctx ) {
+        if ( Enabled ) {
+            OnTouchCancelPosition?.Invoke( inputControls.Swipe.TouchPosition.ReadValue<Vector2>() );
+        }
+    }
 }

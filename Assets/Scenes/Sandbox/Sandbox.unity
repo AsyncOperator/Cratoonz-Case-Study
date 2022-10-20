@@ -523,6 +523,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c581fbec4d1dda48ad5f9d864580f27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boardCreator: {fileID: 317593117}
   boardSetter: {fileID: 317593119}
   dropMover: {fileID: 1175029123}
 --- !u!4 &906869081

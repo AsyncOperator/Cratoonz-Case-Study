@@ -47,6 +47,9 @@ public sealed class Matcher : MonoBehaviour {
         if ( tiles.Count != 0 ) {
             RemoveTilesDrop( tiles );
         }
+        else {
+            InputManager.Instance.Enabled = true;
+        }
     }
 
     private bool TryFindMatches( Vector2Int firstRowColumn, Vector2Int secondRowColumn ) {
@@ -63,6 +66,7 @@ public sealed class Matcher : MonoBehaviour {
             return true;
         }
         else {
+            InputManager.Instance.Enabled = true;
             return false;
         }
     }

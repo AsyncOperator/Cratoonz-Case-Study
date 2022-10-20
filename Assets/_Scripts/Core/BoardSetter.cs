@@ -153,7 +153,6 @@ namespace Core.Board {
                     tasks[ i ] = dropMover.MoveTo( fromTile, toTile );
                 }
 
-                // This must be greater than dropMover dropDuration time
                 await Task.WhenAll( tasks );
                 await Task.Delay( 200 );
 
